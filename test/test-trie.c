@@ -26,7 +26,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "alloc-testing.h"
 #include "framework.h"
 
-#include "trie.h"
+#include "calg/trie.h"
 
 #define NUM_TEST_VALUES 10000
 

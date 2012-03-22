@@ -24,8 +24,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "alloc-testing.h"
 #include "framework.h"
 
-#include "binomial-heap.h"
-#include "compare-int.h"
+#include "calg/binomial-heap.h"
+#include "calg/compare-int.h"
 
 #define NUM_TEST_VALUES 10000
 

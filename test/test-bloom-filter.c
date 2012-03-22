@@ -25,8 +25,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "alloc-testing.h"
 #include "framework.h"
 
-#include "bloom-filter.h"
-#include "hash-string.h"
+#include "calg/bloom-filter.h"
+#include "calg/hash-string.h"
 
 void test_bloom_filter_new_free (void) {
   BloomFilter* filter;

@@ -34,6 +34,11 @@ tapeworm.c
 .DS_Store
 
 ##
+## Test File
+##
+ca-*
+
+##
 ## Directories generated/curated by Ruby Gems
 ##
 

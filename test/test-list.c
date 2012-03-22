@@ -25,8 +25,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "alloc-testing.h"
 #include "framework.h"
 
-#include "list.h"
-#include "compare-int.h"
+#include "calg/list.h"
+#include "calg/compare-int.h"
 
 int variable1 = 50, variable2, variable3, variable4;
 

@@ -25,7 +25,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "alloc-testing.h"
 #include "framework.h"
 
-#include "queue.h"
+#include "calg/queue.h"
 
 int variable1, variable2, variable3, variable4;
 

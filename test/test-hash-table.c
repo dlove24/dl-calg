@@ -26,11 +26,11 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "alloc-testing.h"
 #include "framework.h"
 
-#include "hash-table.h"
-#include "hash-int.h"
-#include "compare-int.h"
-#include "hash-string.h"
-#include "compare-string.h"
+#include "calg/hash-table.h"
+#include "calg/hash-int.h"
+#include "calg/compare-int.h"
+#include "calg/hash-string.h"
+#include "calg/compare-string.h"
 
 #define NUM_TEST_VALUES 10000
 

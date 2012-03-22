@@ -41,6 +41,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_library( calg STATIC
 	src/arraylist.c
 	src/avl-tree.c
+	src/root-tree.c
 	src/binary-heap.c
 	src/binomial-heap.c
 	src/bloom-filter.c

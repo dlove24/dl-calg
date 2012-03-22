@@ -27,9 +27,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "alloc-testing.h"
 #include "framework.h"
 
-#include "compare-int.h"
-#include "compare-pointer.h"
-#include "compare-string.h"
+#include "calg/compare-int.h"
+#include "calg/compare-pointer.h"
+#include "calg/compare-string.h"
 
 void test_int_compare (void) {
   int a = 4;

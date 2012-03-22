@@ -25,8 +25,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "alloc-testing.h"
 #include "framework.h"
 
-#include "avl-tree.h"
-#include "compare-int.h"
+#include "calg/avl-tree.h"
+#include "calg/compare-int.h"
 
 #define NUM_TEST_VALUES 1000
 
