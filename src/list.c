@@ -2,25 +2,25 @@
 
 Copyright (c) 2005-2008, Simon Howard
 
-Permission to use, copy, modify, and/or distribute this software 
-for any purpose with or without fee is hereby granted, provided 
-that the above copyright notice and this permission notice appear 
-in all copies. 
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted, provided
+that the above copyright notice and this permission notice appear
+in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE 
-AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN      
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
 
 #include <stdlib.h>
 
-#include "list.h"
+#include "calg/list.h"
 
 /* malloc() / free() testing */
 
@@ -31,513 +31,518 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* A doubly-linked list */
 
 struct _ListEntry {
-	ListValue data;
-	ListEntry *prev;
-	ListEntry *next;
-};
+  ListValue data;
+  ListEntry* prev;
+  ListEntry* next;
+  };
 
-void list_free(ListEntry *list)
-{
-	ListEntry *entry;
+void list_free (ListEntry* list) {
+  ListEntry* entry;
 
-	/* Iterate over each entry, freeing each list entry, until the
-	 * end is reached */
+  /* Iterate over each entry, freeing each list entry, until the
+   * end is reached */
 
-	entry = list;
+  entry = list;
 
-	while (entry != NULL) {
-		ListEntry *next;
-	   
-		next = entry->next;
+  while (entry != NULL) {
+    ListEntry* next;
 
-		free(entry);
+    next = entry->next;
 
-		entry = next;
-	}
-}
+    free (entry);
 
-ListEntry *list_prepend(ListEntry **list, ListValue data)
-{
-	ListEntry *newentry;
+    entry = next;
+    }
+  }
 
-	/* Create new entry */
+ListEntry* list_prepend (ListEntry** list, ListValue data) {
+  ListEntry* newentry;
 
-	newentry = malloc(sizeof(ListEntry));
+  /* Create new entry */
 
-	if (newentry == NULL) {
-		return NULL;
-	}
-	
-	newentry->data = data;
+  newentry = malloc (sizeof (ListEntry));
 
-	/* Hook into the list start */
+  if (newentry == NULL) {
+    return NULL;
+    }
 
-	if (*list != NULL) {
-		(*list)->prev = newentry;
-	}
-	newentry->prev = NULL;
-	newentry->next = *list;
-	*list = newentry;
+  newentry->data = data;
 
-	return newentry;
-}
+  /* Hook into the list start */
 
-ListEntry *list_append(ListEntry **list, ListValue data)
-{
-	ListEntry *rover;
-	ListEntry *newentry;
+  if (*list != NULL) {
+    (*list)->prev = newentry;
+    }
 
-	/* Create new list entry */
+  newentry->prev = NULL;
+  newentry->next = *list;
+  *list = newentry;
 
-	newentry = malloc(sizeof(ListEntry));
+  return newentry;
+  }
 
-	if (newentry == NULL) {
-		return NULL;
-	}
-	
-	newentry->data = data;
-	newentry->next = NULL;
-	
-	/* Hooking into the list is different if the list is empty */
+ListEntry* list_append (ListEntry** list, ListValue data) {
+  ListEntry* rover;
+  ListEntry* newentry;
 
-	if (*list == NULL) {
+  /* Create new list entry */
 
-		/* Create the start of the list */
+  newentry = malloc (sizeof (ListEntry));
 
-		*list = newentry;
-		newentry->prev = NULL;
+  if (newentry == NULL) {
+    return NULL;
+    }
 
-	} else {
+  newentry->data = data;
+  newentry->next = NULL;
 
-		/* Find the end of list */
+  /* Hooking into the list is different if the list is empty */
 
-		for (rover=*list; rover->next != NULL; rover = rover->next);
+  if (*list == NULL) {
 
-		/* Add to the end of list */
+    /* Create the start of the list */
 
-		newentry->prev = rover;
-		rover->next = newentry;
-	}
+    *list = newentry;
+    newentry->prev = NULL;
 
-	return newentry;
-}
+    }
 
-ListValue list_data(ListEntry *listentry)
-{
-	return listentry->data;
-}
+  else {
 
-ListEntry *list_prev(ListEntry *listentry)
-{
-	return listentry->prev;
-}
+    /* Find the end of list */
 
-ListEntry *list_next(ListEntry *listentry)
-{
-	return listentry->next;
-}
+    for (rover = *list; rover->next != NULL; rover = rover->next) {
+      ;
+      }
 
-ListEntry *list_nth_entry(ListEntry *list, unsigned int n)
-{
-	ListEntry *entry;
-	unsigned int i;
+    /* Add to the end of list */
 
-	/* Negative values are always out of range */
+    newentry->prev = rover;
+    rover->next = newentry;
+    }
 
-	if (n < 0) {
-		return NULL;
-	}
+  return newentry;
+  }
 
-	/* Iterate through n list entries to reach the desired entry.
-	 * Make sure we do not reach the end of the list. */
+ListValue list_data (ListEntry* listentry) {
+  return listentry->data;
+  }
 
-	entry = list;
+ListEntry* list_prev (ListEntry* listentry) {
+  return listentry->prev;
+  }
 
-	for (i=0; i<n; ++i) {
+ListEntry* list_next (ListEntry* listentry) {
+  return listentry->next;
+  }
 
-		if (entry == NULL) {
-			return NULL;
-		}
-		entry = entry->next;
-	}
+ListEntry* list_nth_entry (ListEntry* list, unsigned int n) {
+  ListEntry* entry;
+  unsigned int i;
 
-	return entry;
-}
+  /* Iterate through n list entries to reach the desired entry.
+   * Make sure we do not reach the end of the list. */
 
-ListValue list_nth_data(ListEntry *list, unsigned int n)
-{
-	ListEntry *entry;
+  entry = list;
 
-	/* Find the specified entry */
+  for (i = 0; i < n; ++i) {
 
-	entry = list_nth_entry(list, n);
+    if (entry == NULL) {
+      return NULL;
+      }
 
-	/* If out of range, return NULL, otherwise return the data */
+    entry = entry->next;
+    }
 
-	if (entry == NULL) {
-		return LIST_NULL;
-	} else {
-		return entry->data;
-	}
-}
+  return entry;
+  }
 
-unsigned int list_length(ListEntry *list)
-{
-	ListEntry *entry;
-	unsigned int length;
+ListValue list_nth_data (ListEntry* list, unsigned int n) {
+  ListEntry* entry;
 
-	length = 0;
-	entry = list;
+  /* Find the specified entry */
 
-	while (entry != NULL) {
+  entry = list_nth_entry (list, n);
 
-		/* Count the number of entries */
+  /* If out of range, return NULL, otherwise return the data */
 
-		++length;
+  if (entry == NULL) {
+    return LIST_NULL;
+    }
 
-		entry = entry->next;
-	}
+  else {
+    return entry->data;
+    }
+  }
 
-	return length;
-}
+unsigned int list_length (ListEntry* list) {
+  ListEntry* entry;
+  unsigned int length;
 
-ListValue *list_to_array(ListEntry *list)
-{
-	ListEntry *rover;
-	ListValue *array;
-	unsigned int length;
-	unsigned int i;
+  length = 0;
+  entry = list;
 
-	/* Allocate an array equal in size to the list length */
+  while (entry != NULL) {
 
-	length = list_length(list);
+    /* Count the number of entries */
 
-	array = malloc(sizeof(ListValue) * length);
+    ++length;
 
-	if (array == NULL) {
-		return NULL;
-	}
+    entry = entry->next;
+    }
 
-	/* Add all entries to the array */
+  return length;
+  }
 
-	rover = list;
+ListValue* list_to_array (ListEntry* list) {
+  ListEntry* rover;
+  ListValue* array;
+  unsigned int length;
+  unsigned int i;
 
-	for (i=0; i<length; ++i) {
+  /* Allocate an array equal in size to the list length */
 
-		/* Add this node's data */
+  length = list_length (list);
 
-		array[i] = rover->data;
+  array = malloc (sizeof (ListValue) * length);
 
-		/* Jump to the next list node */
+  if (array == NULL) {
+    return NULL;
+    }
 
-		rover = rover->next;
-	}
+  /* Add all entries to the array */
 
-	return array;
-}
+  rover = list;
 
-int list_remove_entry(ListEntry **list, ListEntry *entry)
-{
-	/* If the list is empty, or entry is NULL, always fail */
+  for (i = 0; i < length; ++i) {
 
-	if (*list == NULL || entry == NULL) {
-		return 0;
-	}
-	
-	/* Action to take is different if the entry is the first in the list */
+    /* Add this node's data */
 
-	if (entry->prev == NULL) {
+    array[i] = rover->data;
 
-		/* Unlink the first entry and update the starting pointer */
+    /* Jump to the next list node */
 
-		*list = entry->next;
+    rover = rover->next;
+    }
 
-		/* Update the second entry's prev pointer, if there is a second
-		 * entry */
+  return array;
+  }
 
-		if (entry->next != NULL) {
-			entry->next->prev = NULL;
-		}
+int list_remove_entry (ListEntry** list, ListEntry* entry) {
+  /* If the list is empty, or entry is NULL, always fail */
 
-	} else {
+  if (*list == NULL || entry == NULL) {
+    return 0;
+    }
 
-		/* This is not the first in the list, so we must have a 
-		 * previous entry.  Update its 'next' pointer to the new 
-		 * value */
+  /* Action to take is different if the entry is the first in the list */
 
-		entry->prev->next = entry->next;
+  if (entry->prev == NULL) {
 
-		/* If there is an entry following this one, update its 'prev'
-		 * pointer to the new value */
+    /* Unlink the first entry and update the starting pointer */
 
-		if (entry->next != NULL) {
-			entry->next->prev = entry->prev;
-		}
-	}
+    *list = entry->next;
 
-	/* Free the list entry */
+    /* Update the second entry's prev pointer, if there is a second
+     * entry */
 
-	free(entry);
+    if (entry->next != NULL) {
+      entry->next->prev = NULL;
+      }
 
-	/* Operation successful */
+    }
 
-	return 1;
-}
+  else {
 
-unsigned int list_remove_data(ListEntry **list, ListEqualFunc callback,
-                              ListValue data)
-{
-	unsigned int entries_removed;
-	ListEntry *rover;
-	ListEntry *next;
+    /* This is not the first in the list, so we must have a
+     * previous entry.  Update its 'next' pointer to the new
+     * value */
 
-	entries_removed = 0;
+    entry->prev->next = entry->next;
 
-	/* Iterate over the entries in the list */
+    /* If there is an entry following this one, update its 'prev'
+     * pointer to the new value */
 
-	rover = *list;
+    if (entry->next != NULL) {
+      entry->next->prev = entry->prev;
+      }
+    }
 
-	while (rover != NULL) {
+  /* Free the list entry */
 
-		next = rover->next;
+  free (entry);
 
-		if (callback(rover->data, data)) {
+  /* Operation successful */
 
-			/* This data needs to be removed.  Unlink this entry
-			 * from the list. */
+  return 1;
+  }
 
-			if (rover->prev == NULL) {
+unsigned int list_remove_data (ListEntry** list, ListEqualFunc callback,
+                               ListValue data) {
+  unsigned int entries_removed;
+  ListEntry* rover;
+  ListEntry* next;
 
-				/* This is the first entry in the list */
+  entries_removed = 0;
 
-				*list = rover->next;
-			} else {
+  /* Iterate over the entries in the list */
 
-				/* Point the previous entry at its new
-				 * location */
+  rover = *list;
 
-				rover->prev->next = rover->next;
-			}
+  while (rover != NULL) {
 
-			if (rover->next != NULL) {
-				rover->next->prev = rover->prev;
-			}
+    next = rover->next;
 
-			/* Free the entry */
+    if (callback (rover->data, data)) {
 
-			free(rover);
+      /* This data needs to be removed.  Unlink this entry
+       * from the list. */
 
-			++entries_removed;
-		}
+      if (rover->prev == NULL) {
 
-		/* Advance to the next list entry */
+        /* This is the first entry in the list */
 
-		rover = next;
-	}
+        *list = rover->next;
+        }
 
-	return entries_removed;
-}
+      else {
+
+        /* Point the previous entry at its new
+         * location */
+
+        rover->prev->next = rover->next;
+        }
+
+      if (rover->next != NULL) {
+        rover->next->prev = rover->prev;
+        }
+
+      /* Free the entry */
+
+      free (rover);
+
+      ++entries_removed;
+      }
+
+    /* Advance to the next list entry */
+
+    rover = next;
+    }
+
+  return entries_removed;
+  }
 
 /* Function used internally for sorting.  Returns the last entry in the
  * new sorted list */
 
-static ListEntry *list_sort_internal(ListEntry **list, 
-                                     ListCompareFunc compare_func)
-{
-	ListEntry *pivot;
-	ListEntry *rover;
-	ListEntry *less_list, *more_list;
-	ListEntry *less_list_end, *more_list_end;
-	
-	/* If there are less than two entries in this list, it is
-	 * already sorted */
+static ListEntry* list_sort_internal (ListEntry** list,
+                                      ListCompareFunc compare_func) {
+  ListEntry* pivot;
+  ListEntry* rover;
+  ListEntry* less_list, *more_list;
+  ListEntry* less_list_end, *more_list_end;
 
-	if (*list == NULL || (*list)->next == NULL) {
-		return *list;
-	}
+  /* If there are less than two entries in this list, it is
+   * already sorted */
 
-	/* The first entry is the pivot */
+  if (*list == NULL || (*list)->next == NULL) {
+    return *list;
+    }
 
-	pivot = *list;
+  /* The first entry is the pivot */
 
-	/* Iterate over the list, starting from the second entry.  Sort
-	 * all entries into the less and more lists based on comparisons
-	 * with the pivot */
+  pivot = *list;
 
-	less_list = NULL;
-	more_list = NULL;
-	rover = (*list)->next;
+  /* Iterate over the list, starting from the second entry.  Sort
+   * all entries into the less and more lists based on comparisons
+   * with the pivot */
 
-	while (rover != NULL) {
-		ListEntry *next = rover->next;
+  less_list = NULL;
+  more_list = NULL;
+  rover = (*list)->next;
 
-		if (compare_func(rover->data, pivot->data) < 0) {
+  while (rover != NULL) {
+    ListEntry* next = rover->next;
 
-			/* Place this in the less list */
+    if (compare_func (rover->data, pivot->data) < 0) {
 
-			rover->prev = NULL;
-			rover->next = less_list;
-			if (less_list != NULL) {
-				less_list->prev = rover;
-			}
-			less_list = rover;
+      /* Place this in the less list */
 
-		} else {
+      rover->prev = NULL;
+      rover->next = less_list;
 
-			/* Place this in the more list */
+      if (less_list != NULL) {
+        less_list->prev = rover;
+        }
 
-			rover->prev = NULL;
-			rover->next = more_list;
-			if (more_list != NULL) {
-				more_list->prev = rover;
-			}
-			more_list = rover;
-		}
+      less_list = rover;
 
-		rover = next;
-	}
+      }
 
-	/* Sort the sublists recursively */
+    else {
 
-	less_list_end = list_sort_internal(&less_list, compare_func);
-	more_list_end = list_sort_internal(&more_list, compare_func);
+      /* Place this in the more list */
 
-	/* Create the new list starting from the less list */
+      rover->prev = NULL;
+      rover->next = more_list;
 
-	*list = less_list;
+      if (more_list != NULL) {
+        more_list->prev = rover;
+        }
 
-	/* Append the pivot to the end of the less list.  If the less list
-	 * was empty, start from the pivot */
+      more_list = rover;
+      }
 
-	if (less_list == NULL) {
-		pivot->prev = NULL;
-		*list = pivot;
-	} else {
-		pivot->prev = less_list_end;
-		less_list_end->next = pivot;
-	}
+    rover = next;
+    }
 
-	/* Append the more list after the pivot */
+  /* Sort the sublists recursively */
 
-	pivot->next = more_list;
-	if (more_list != NULL) {
-		more_list->prev = pivot;
-	}
+  less_list_end = list_sort_internal (&less_list, compare_func);
+  more_list_end = list_sort_internal (&more_list, compare_func);
 
-	/* Work out what the last entry in the list is.  If the more list was 
-	 * empty, the pivot was the last entry.  Otherwise, the end of the 
-	 * more list is the end of the total list. */
+  /* Create the new list starting from the less list */
 
-	if (more_list == NULL) {
-		return pivot;
-	} else {
-		return more_list_end;
-	}
-}
+  *list = less_list;
 
-void list_sort(ListEntry **list, ListCompareFunc compare_func)
-{
-	list_sort_internal(list, compare_func);
-}
+  /* Append the pivot to the end of the less list.  If the less list
+   * was empty, start from the pivot */
 
-ListEntry *list_find_data(ListEntry *list,
-                          ListEqualFunc callback,
-                          ListValue data)
-{
-	ListEntry *rover;
+  if (less_list == NULL) {
+    pivot->prev = NULL;
+    *list = pivot;
+    }
 
-	/* Iterate over entries in the list until the data is found */
+  else {
+    pivot->prev = less_list_end;
+    less_list_end->next = pivot;
+    }
 
-	for (rover=list; rover != NULL; rover=rover->next) {
-		if (callback(rover->data, data) != 0) {
-			return rover;
-		}
-	}
-	
-	/* Not found */
+  /* Append the more list after the pivot */
 
-	return NULL;
-}
+  pivot->next = more_list;
 
-void list_iterate(ListEntry **list, ListIterator *iter)
-{
-	/* Start iterating from the beginning of the list. */
+  if (more_list != NULL) {
+    more_list->prev = pivot;
+    }
 
-	iter->prev_next = list;
+  /* Work out what the last entry in the list is.  If the more list was
+   * empty, the pivot was the last entry.  Otherwise, the end of the
+   * more list is the end of the total list. */
 
-	/* We have not yet read the first item. */
+  if (more_list == NULL) {
+    return pivot;
+    }
 
-	iter->current = NULL;
-}
+  else {
+    return more_list_end;
+    }
+  }
 
-int list_iter_has_more(ListIterator *iter)
-{
-	if (iter->current == NULL || iter->current != *iter->prev_next) {
+void list_sort (ListEntry** list, ListCompareFunc compare_func) {
+  list_sort_internal (list, compare_func);
+  }
 
-		/* Either we have not read the first entry, the current
-		 * item was removed or we have reached the end of the
-		 * list.  Use prev_next to determine if we have a next
-		 * value to iterate over. */
+ListEntry* list_find_data (ListEntry* list,
+                           ListEqualFunc callback,
+                           ListValue data) {
+  ListEntry* rover;
 
-		return *iter->prev_next != NULL;
+  /* Iterate over entries in the list until the data is found */
 
-	} else {
-		/* The current entry as not been deleted since the last 
-		 * call to list_iter_next: there is a next entry if 
-		 * current->next is not NULL */
+  for (rover = list; rover != NULL; rover = rover->next) {
+    if (callback (rover->data, data) != 0) {
+      return rover;
+      }
+    }
 
-		return iter->current->next != NULL;
-	}
-}
+  /* Not found */
 
-ListValue list_iter_next(ListIterator *iter)
-{
-	if (iter->current == NULL || iter->current != *iter->prev_next) {
+  return NULL;
+  }
 
-		/* Either we are reading the first entry, we have reached
-		 * the end of the list, or the previous entry was removed.
-		 * Get the next entry with iter->prev_next. */
+void list_iterate (ListEntry** list, ListIterator* iter) {
+  /* Start iterating from the beginning of the list. */
 
-		iter->current = *iter->prev_next;
+  iter->prev_next = list;
 
-	} else {
+  /* We have not yet read the first item. */
 
-		/* Last value returned from list_iter_next was not deleted.
-		 * Advance to the next entry. */
+  iter->current = NULL;
+  }
 
-		iter->prev_next = &iter->current->next;
-		iter->current = iter->current->next;
-	}
-	
-	/* Have we reached the end of the list? */
+int list_iter_has_more (ListIterator* iter) {
+  if (iter->current == NULL || iter->current != *iter->prev_next) {
 
-	if (iter->current == NULL) {
-		return LIST_NULL;
-	} else {
-		return iter->current->data;
-	}
-}
+    /* Either we have not read the first entry, the current
+     * item was removed or we have reached the end of the
+     * list.  Use prev_next to determine if we have a next
+     * value to iterate over. */
 
-void list_iter_remove(ListIterator *iter)
-{
-	if (iter->current == NULL || iter->current != *iter->prev_next) {
+    return *iter->prev_next != NULL;
 
-		/* Either we have not yet read the first item, we have 
-		 * reached the end of the list, or we have already removed
-		 * the current value.  Either way, do nothing. */
+    }
 
-	} else {
-		
-		/* Remove the current entry */
+  else {
+    /* The current entry as not been deleted since the last
+     * call to list_iter_next: there is a next entry if
+     * current->next is not NULL */
 
-		*iter->prev_next = iter->current->next;
+    return iter->current->next != NULL;
+    }
+  }
 
-		if (iter->current->next != NULL) {
-			iter->current->next->prev = iter->current->prev;
-		}
+ListValue list_iter_next (ListIterator* iter) {
+  if (iter->current == NULL || iter->current != *iter->prev_next) {
 
-		free(iter->current);
-		iter->current = NULL;
-	}
-}
+    /* Either we are reading the first entry, we have reached
+     * the end of the list, or the previous entry was removed.
+     * Get the next entry with iter->prev_next. */
+
+    iter->current = *iter->prev_next;
+
+    }
+
+  else {
+
+    /* Last value returned from list_iter_next was not deleted.
+     * Advance to the next entry. */
+
+    iter->prev_next = &iter->current->next;
+    iter->current = iter->current->next;
+    }
+
+  /* Have we reached the end of the list? */
+
+  if (iter->current == NULL) {
+    return LIST_NULL;
+    }
+
+  else {
+    return iter->current->data;
+    }
+  }
+
+void list_iter_remove (ListIterator* iter) {
+  if (iter->current == NULL || iter->current != *iter->prev_next) {
+
+    /* Either we have not yet read the first item, we have
+     * reached the end of the list, or we have already removed
+     * the current value.  Either way, do nothing. */
+
+    }
+  else {
+
+    /* Remove the current entry */
+
+    *iter->prev_next = iter->current->next;
+
+    if (iter->current->next != NULL) {
+      iter->current->next->prev = iter->current->prev;
+      }
+
+    free (iter->current);
+    iter->current = NULL;
+    }
+  }
 

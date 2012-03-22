@@ -2,25 +2,25 @@
 
 Copyright (c) 2005-2008, Simon Howard
 
-Permission to use, copy, modify, and/or distribute this software 
-for any purpose with or without fee is hereby granted, provided 
-that the above copyright notice and this permission notice appear 
-in all copies. 
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted, provided
+that the above copyright notice and this permission notice appear
+in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE 
-AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN      
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
 
 #include <stdlib.h>
 
-#include "binary-heap.h"
+#include "calg/binary-heap.h"
 
 /* malloc() / free() testing */
 
@@ -29,204 +29,208 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 struct _BinaryHeap {
-	BinaryHeapType heap_type;
-	BinaryHeapValue *values;
-	unsigned int num_values;
-	unsigned int alloced_size;
-	BinaryHeapCompareFunc compare_func;
-};
+  BinaryHeapType heap_type;
+  BinaryHeapValue* values;
+  unsigned int num_values;
+  unsigned int alloced_size;
+  BinaryHeapCompareFunc compare_func;
+  };
 
-static int binary_heap_cmp(BinaryHeap *heap, BinaryHeapValue data1, BinaryHeapValue data2)
-{
-	if (heap->heap_type == BINARY_HEAP_TYPE_MIN) {
-		return heap->compare_func(data1, data2);
-	} else {
-		return -heap->compare_func(data1, data2);
-	}
-}
+static int binary_heap_cmp (BinaryHeap* heap, BinaryHeapValue data1, BinaryHeapValue data2) {
+  if (heap->heap_type == BINARY_HEAP_TYPE_MIN) {
+    return heap->compare_func (data1, data2);
+    }
 
-BinaryHeap *binary_heap_new(BinaryHeapType heap_type,
-                            BinaryHeapCompareFunc compare_func)
-{
-	BinaryHeap *heap;
+  else {
+    return -heap->compare_func (data1, data2);
+    }
+  }
 
-	heap = malloc(sizeof(BinaryHeap));
+BinaryHeap* binary_heap_new (BinaryHeapType heap_type,
+                             BinaryHeapCompareFunc compare_func) {
+  BinaryHeap* heap;
 
-	if (heap == NULL) {
-		return NULL;
-	}
-	
-	heap->heap_type = heap_type;
-	heap->num_values = 0;
-	heap->compare_func = compare_func;
-	
-	/* Initial size of 16 elements */
+  heap = malloc (sizeof (BinaryHeap));
 
-	heap->alloced_size = 16;
-	heap->values = malloc(sizeof(BinaryHeapValue) * heap->alloced_size);
+  if (heap == NULL) {
+    return NULL;
+    }
 
-	if (heap->values == NULL) {
-		free(heap);
-		return NULL;
-	}
-	
-	return heap;
-}
+  heap->heap_type = heap_type;
+  heap->num_values = 0;
+  heap->compare_func = compare_func;
 
-void binary_heap_free(BinaryHeap *heap)
-{
-	free(heap->values);
-	free(heap);
-}
+  /* Initial size of 16 elements */
 
-int binary_heap_insert(BinaryHeap *heap, BinaryHeapValue value)
-{
-	BinaryHeapValue *new_values;
-	unsigned int index;
-	unsigned int new_size;
-	unsigned int parent;
+  heap->alloced_size = 16;
+  heap->values = malloc (sizeof (BinaryHeapValue) * heap->alloced_size);
 
-	/* Possibly realloc the heap to a larger size */
+  if (heap->values == NULL) {
+    free (heap);
+    return NULL;
+    }
 
-	if (heap->num_values >= heap->alloced_size) {
+  return heap;
+  }
 
-		/* Double the table size */
+void binary_heap_free (BinaryHeap* heap) {
+  free (heap->values);
+  free (heap);
+  }
 
-		new_size = heap->alloced_size * 2;
-		new_values = realloc(heap->values, sizeof(BinaryHeapValue) * new_size);
+int binary_heap_insert (BinaryHeap* heap, BinaryHeapValue value) {
+  BinaryHeapValue* new_values;
+  unsigned int index;
+  unsigned int new_size;
+  unsigned int parent;
 
-		if (new_values == NULL) {
-			return 0;
-		}
+  /* Possibly realloc the heap to a larger size */
 
-		heap->alloced_size = new_size;
-		heap->values = new_values;
-	}
+  if (heap->num_values >= heap->alloced_size) {
 
-	/* Add to the bottom of the heap and start from there */
+    /* Double the table size */
 
-	index = heap->num_values;
-	++heap->num_values;
+    new_size = heap->alloced_size * 2;
+    new_values = realloc (heap->values, sizeof (BinaryHeapValue) * new_size);
 
-	/* Percolate the value up to the top of the heap */
+    if (new_values == NULL) {
+      return 0;
+      }
 
-	while (index > 0) {
+    heap->alloced_size = new_size;
+    heap->values = new_values;
+    }
 
-		/* The parent index is found by halving the node index */
+  /* Add to the bottom of the heap and start from there */
 
-		parent = (index - 1) / 2;
+  index = heap->num_values;
+  ++heap->num_values;
 
-		/* Compare the node with its parent */
+  /* Percolate the value up to the top of the heap */
 
-		if (binary_heap_cmp(heap, heap->values[parent], value) < 0) {
-			
-			/* Ordered correctly - insertion is complete */
+  while (index > 0) {
 
-			break;
+    /* The parent index is found by halving the node index */
 
-		} else {
+    parent = (index - 1) / 2;
 
-			/* Need to swap this node with its parent */
+    /* Compare the node with its parent */
 
-			heap->values[index] = heap->values[parent];
+    if (binary_heap_cmp (heap, heap->values[parent], value) < 0) {
 
-			/* Advance up to the parent */
+      /* Ordered correctly - insertion is complete */
 
-			index = parent;
-		}
-	}
+      break;
 
-	/* Save the new value in the final location */
+      }
 
-	heap->values[index] = value;
+    else {
 
-	return 1;
-}
+      /* Need to swap this node with its parent */
 
-BinaryHeapValue binary_heap_pop(BinaryHeap *heap)
-{
-	BinaryHeapValue result;
-	BinaryHeapValue new_value;
-	unsigned int index;
-	unsigned int next_index;
-	unsigned int child1, child2;
+      heap->values[index] = heap->values[parent];
 
-	/* Empty heap? */
+      /* Advance up to the parent */
 
-	if (heap->num_values == 0) {
-		return BINARY_HEAP_NULL;
-	}
+      index = parent;
+      }
+    }
 
-	/* Take the value from the top of the heap */
+  /* Save the new value in the final location */
 
-	result = heap->values[0];
+  heap->values[index] = value;
 
-	/* Remove the last value from the heap; we will percolate this down
-	 * from the top. */
+  return 1;
+  }
 
-	new_value = heap->values[heap->num_values - 1];
-	--heap->num_values;
+BinaryHeapValue binary_heap_pop (BinaryHeap* heap) {
+  BinaryHeapValue result;
+  BinaryHeapValue new_value;
+  unsigned int index;
+  unsigned int next_index;
+  unsigned int child1, child2;
 
-	/* Percolate the new top value down */
+  /* Empty heap? */
 
-	index = 0;
+  if (heap->num_values == 0) {
+    return BINARY_HEAP_NULL;
+    }
 
-	for (;;) {
+  /* Take the value from the top of the heap */
 
-		/* Calculate the array indexes of the children of this node */
-		
-		child1 = index * 2 + 1;
-		child2 = index * 2 + 2;
+  result = heap->values[0];
 
-		if (child1 < heap->num_values
-		 && binary_heap_cmp(heap, 
-		                    new_value, 
-		                    heap->values[child1]) > 0) {
+  /* Remove the last value from the heap; we will percolate this down
+   * from the top. */
 
-			/* Left child is less than the node.  We need to swap
-			 * with one of the children, whichever is less. */
+  new_value = heap->values[heap->num_values - 1];
+  --heap->num_values;
 
-			if (child2 < heap->num_values
-			 && binary_heap_cmp(heap,
-			                    heap->values[child1],
-			                    heap->values[child2]) > 0) {
-				next_index = child2;
-			} else {
-				next_index = child1;
-			}
-			
-		} else if (child2 < heap->num_values
-		        && binary_heap_cmp(heap, 
-		                           new_value, 
-		                           heap->values[child2]) > 0) {
+  /* Percolate the new top value down */
 
-			/* Right child is less than the node.  Swap with the 
-			 * right child. */
+  index = 0;
 
-			next_index = child2;
+  for (;;) {
 
-		} else {
-			/* Node is less than both its children.  The heap condition
-			 * is satisfied.  We can stop percolating down. */
+    /* Calculate the array indexes of the children of this node */
 
-			heap->values[index] = new_value;
-			break;
-		}
+    child1 = index * 2 + 1;
+    child2 = index * 2 + 2;
 
-		/* Swap the current node with the least of the child nodes. */
+    if (child1 < heap->num_values
+        && binary_heap_cmp (heap,
+                            new_value,
+                            heap->values[child1]) > 0) {
 
-		heap->values[index] = heap->values[next_index];
+      /* Left child is less than the node.  We need to swap
+       * with one of the children, whichever is less. */
 
-		/* Advance to the child we chose */
+      if (child2 < heap->num_values
+          && binary_heap_cmp (heap,
+                              heap->values[child1],
+                              heap->values[child2]) > 0) {
+        next_index = child2;
+        }
 
-		index = next_index;
-	}
+      else {
+        next_index = child1;
+        }
 
-	return result;
-}
+      }
 
-unsigned int binary_heap_num_entries(BinaryHeap *heap)
-{
-	return heap->num_values;
-}
+    else if (child2 < heap->num_values
+             && binary_heap_cmp (heap,
+                                 new_value,
+                                 heap->values[child2]) > 0) {
+
+      /* Right child is less than the node.  Swap with the
+       * right child. */
+
+      next_index = child2;
+
+      }
+
+    else {
+      /* Node is less than both its children.  The heap condition
+       * is satisfied.  We can stop percolating down. */
+
+      heap->values[index] = new_value;
+      break;
+      }
+
+    /* Swap the current node with the least of the child nodes. */
+
+    heap->values[index] = heap->values[next_index];
+
+    /* Advance to the child we chose */
+
+    index = next_index;
+    }
+
+  return result;
+  }
+
+unsigned int binary_heap_num_entries (BinaryHeap* heap) {
+  return heap->num_values;
+  }
 

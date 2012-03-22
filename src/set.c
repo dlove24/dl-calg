@@ -2,25 +2,25 @@
 
 Copyright (c) 2005-2008, Simon Howard
 
-Permission to use, copy, modify, and/or distribute this software 
-for any purpose with or without fee is hereby granted, provided 
-that the above copyright notice and this permission notice appear 
-in all copies. 
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted, provided
+that the above copyright notice and this permission notice appear
+in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE 
-AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN      
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
 
 #include <stdlib.h>
 #include <string.h>
-#include "set.h"
+#include "calg/set.h"
 
 /* malloc() / free() testing */
 
@@ -31,19 +31,19 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* A set */
 
 struct _SetEntry {
-	SetValue data;
-	SetEntry *next;
-};
+  SetValue data;
+  SetEntry* next;
+  };
 
 struct _Set {
-	SetEntry **table;
-	unsigned int entries;
-	unsigned int table_size;
-	unsigned int prime_index;
-	SetHashFunc hash_func;
-	SetEqualFunc equal_func;
-	SetFreeFunc free_func;
-};
+  SetEntry** table;
+  unsigned int entries;
+  unsigned int table_size;
+  unsigned int prime_index;
+  SetHashFunc hash_func;
+  SetEqualFunc equal_func;
+  SetFreeFunc free_func;
+  };
 
 /* This is a set of good hash table prime numbers, from:
  *   http://planetmath.org/encyclopedia/GoodHashTablePrimes.html
@@ -51,552 +51,540 @@ struct _Set {
  * possible from the nearest powers of two. */
 
 static const unsigned int set_primes[] = {
-	193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, 98317,
-	196613, 393241, 786433, 1572869, 3145739, 6291469,
-	12582917, 25165843, 50331653, 100663319, 201326611,
-	402653189, 805306457, 1610612741,
-};
+  193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, 98317,
+  196613, 393241, 786433, 1572869, 3145739, 6291469,
+  12582917, 25165843, 50331653, 100663319, 201326611,
+  402653189, 805306457, 1610612741,
+  };
 
-static const unsigned int set_num_primes = sizeof(set_primes) / sizeof(int);
+static const unsigned int set_num_primes = sizeof (set_primes) / sizeof (int);
 
-static int set_allocate_table(Set *set)
-{
-	/* Determine the table size based on the current prime index.  
-	 * An attempt is made here to ensure sensible behavior if the
-	 * maximum prime is exceeded, but in practice other things are
-	 * likely to break long before that happens. */
-
-	if (set->prime_index < set_num_primes) {
-		set->table_size = set_primes[set->prime_index];
-	} else {
-		set->table_size = set->entries * 10;
-	}
+static int set_allocate_table (Set* set) {
+  /* Determine the table size based on the current prime index.
+   * An attempt is made here to ensure sensible behavior if the
+   * maximum prime is exceeded, but in practice other things are
+   * likely to break long before that happens. */
 
-	/* Allocate the table and initialise to NULL */
-
-	set->table = calloc(set->table_size, sizeof(SetEntry *));
+  if (set->prime_index < set_num_primes) {
+    set->table_size = set_primes[set->prime_index];
+    }
 
-	return set->table != NULL;
-}
+  else {
+    set->table_size = set->entries * 10;
+    }
 
-static void set_free_entry(Set *set, SetEntry *entry) 
-{
-	/* If there is a free function registered, call it to free the 
-	 * data for this entry first */
-	
-	if (set->free_func != NULL) {
-		set->free_func(entry->data);
-	}
+  /* Allocate the table and initialise to NULL */
 
-	/* Free the entry structure */
+  set->table = calloc (set->table_size, sizeof (SetEntry*));
 
-	free(entry);
-}
+  return set->table != NULL;
+  }
 
-Set *set_new(SetHashFunc hash_func, SetEqualFunc equal_func)
-{
-	Set *new_set;
+static void set_free_entry (Set* set, SetEntry* entry) {
+  /* If there is a free function registered, call it to free the
+   * data for this entry first */
 
-	/* Allocate a new set and fill in the fields */
+  if (set->free_func != NULL) {
+    set->free_func (entry->data);
+    }
 
-	new_set = (Set *) malloc(sizeof(Set));
+  /* Free the entry structure */
 
-	if (new_set == NULL) {
-		return NULL;
-	}
-	
-	new_set->hash_func = hash_func;
-	new_set->equal_func = equal_func;
-	new_set->entries = 0;
-	new_set->prime_index = 0;
-	new_set->free_func = NULL;
-	
-	/* Allocate the table */
-	
-	if (!set_allocate_table(new_set)) {
-		free(new_set);
-		return NULL;
-	}
+  free (entry);
+  }
 
-	return new_set;
-}
+Set* set_new (SetHashFunc hash_func, SetEqualFunc equal_func) {
+  Set* new_set;
 
-void set_free(Set *set)
-{
-	SetEntry *rover;
-	SetEntry *next;
-	unsigned int i;
+  /* Allocate a new set and fill in the fields */
 
-	/* Free all entries in all chains */
+  new_set = (Set*) malloc (sizeof (Set));
 
-	for (i=0; i<set->table_size; ++i) {
-		rover = set->table[i];
+  if (new_set == NULL) {
+    return NULL;
+    }
 
-		while (rover != NULL) {
-			next = rover->next;
+  new_set->hash_func = hash_func;
+  new_set->equal_func = equal_func;
+  new_set->entries = 0;
+  new_set->prime_index = 0;
+  new_set->free_func = NULL;
 
-			/* Free this entry */
+  /* Allocate the table */
 
-			set_free_entry(set, rover);
+  if (!set_allocate_table (new_set)) {
+    free (new_set);
+    return NULL;
+    }
 
-			/* Advance to the next entry in the chain */
+  return new_set;
+  }
 
-			rover = next;
-		}
-	}
+void set_free (Set* set) {
+  SetEntry* rover;
+  SetEntry* next;
+  unsigned int i;
 
-	/* Free the table */
+  /* Free all entries in all chains */
 
-	free(set->table);
+  for (i = 0; i < set->table_size; ++i) {
+    rover = set->table[i];
 
-	/* Free the set structure */
+    while (rover != NULL) {
+      next = rover->next;
 
-	free(set);
-}
+      /* Free this entry */
 
-void set_register_free_function(Set *set, SetFreeFunc free_func)
-{
-	set->free_func = free_func;
-}
+      set_free_entry (set, rover);
 
-static int set_enlarge(Set *set)
-{
-	SetEntry *rover;
-	SetEntry *next;
-	SetEntry **old_table;
-	unsigned int old_table_size;
-	unsigned int old_prime_index;
-	unsigned int index;
-	unsigned int i;
+      /* Advance to the next entry in the chain */
 
-	/* Store the old table */
+      rover = next;
+      }
+    }
 
-	old_table = set->table;
-	old_table_size = set->table_size;
-	old_prime_index = set->prime_index;
+  /* Free the table */
 
-	/* Use the next table size from the prime number array */
+  free (set->table);
 
-	++set->prime_index;
+  /* Free the set structure */
 
-	/* Allocate the new table */
+  free (set);
+  }
 
-	if (!set_allocate_table(set)) {
-		set->table = old_table;
-		set->table_size = old_table_size;
-		set->prime_index = old_prime_index;
+void set_register_free_function (Set* set, SetFreeFunc free_func) {
+  set->free_func = free_func;
+  }
 
-		return 0;
-	}
+static int set_enlarge (Set* set) {
+  SetEntry* rover;
+  SetEntry* next;
+  SetEntry** old_table;
+  unsigned int old_table_size;
+  unsigned int old_prime_index;
+  unsigned int index;
+  unsigned int i;
 
-	/* Iterate through all entries in the old table and add them
-	 * to the new one */
+  /* Store the old table */
 
-	for (i=0; i<old_table_size; ++i) {
+  old_table = set->table;
+  old_table_size = set->table_size;
+  old_prime_index = set->prime_index;
 
-		/* Walk along this chain */
+  /* Use the next table size from the prime number array */
 
-		rover = old_table[i];
+  ++set->prime_index;
 
-		while (rover != NULL) {
+  /* Allocate the new table */
 
-			next = rover->next;
+  if (!set_allocate_table (set)) {
+    set->table = old_table;
+    set->table_size = old_table_size;
+    set->prime_index = old_prime_index;
 
-			/* Hook this entry into the new table */
-			
-			index = set->hash_func(rover->data) % set->table_size;
-			rover->next = set->table[index];
-			set->table[index] = rover;
+    return 0;
+    }
 
-			/* Advance to the next entry in the chain */
-			
-			rover = next;
-		}
-	}
+  /* Iterate through all entries in the old table and add them
+   * to the new one */
 
-	/* Free back the old table */
+  for (i = 0; i < old_table_size; ++i) {
 
-	free(old_table);
+    /* Walk along this chain */
 
-	/* Resized successfully */
+    rover = old_table[i];
 
-	return 1;
-}
+    while (rover != NULL) {
 
-int set_insert(Set *set, SetValue data)
-{
-	SetEntry *newentry;
-	SetEntry *rover;
-	unsigned int index;
+      next = rover->next;
 
-	/* The hash table becomes less efficient as the number of entries
-	 * increases. Check if the percentage used becomes large. */
+      /* Hook this entry into the new table */
 
-	if ((set->entries * 3) / set->table_size > 0) {
+      index = set->hash_func (rover->data) % set->table_size;
+      rover->next = set->table[index];
+      set->table[index] = rover;
 
-		/* The table is more than 1/3 full and must be increased in size */
+      /* Advance to the next entry in the chain */
 
-		if (!set_enlarge(set)) {
-			return 0;
-		}
-	}
+      rover = next;
+      }
+    }
 
-	/* Use the hash of the data to determine an index to insert into the 
-	 * table at. */
+  /* Free back the old table */
 
-	index = set->hash_func(data) % set->table_size;
+  free (old_table);
 
-	/* Walk along this chain and attempt to determine if this data has
-	 * already been added to the table */
+  /* Resized successfully */
 
-	rover = set->table[index];
+  return 1;
+  }
 
-	while (rover != NULL) {
+int set_insert (Set* set, SetValue data) {
+  SetEntry* newentry;
+  SetEntry* rover;
+  unsigned int index;
 
-		if (set->equal_func(data, rover->data) != 0) {
+  /* The hash table becomes less efficient as the number of entries
+   * increases. Check if the percentage used becomes large. */
 
-			/* This data is already in the set */
+  if ( (set->entries * 3) / set->table_size > 0) {
 
-			return 0;
-		}
+    /* The table is more than 1/3 full and must be increased in size */
 
-		rover = rover->next;
-	}
+    if (!set_enlarge (set)) {
+      return 0;
+      }
+    }
 
-	/* Not in the set.  We must add a new entry. */
+  /* Use the hash of the data to determine an index to insert into the
+   * table at. */
 
-	/* Make a new entry for this data */
+  index = set->hash_func (data) % set->table_size;
 
-	newentry = (SetEntry *) malloc(sizeof(SetEntry));
+  /* Walk along this chain and attempt to determine if this data has
+   * already been added to the table */
 
-	if (newentry == NULL) {
-		return 0;
-	}
-	
-	newentry->data = data;
-	
-	/* Link into chain */
+  rover = set->table[index];
 
-	newentry->next = set->table[index];
-	set->table[index] = newentry;
+  while (rover != NULL) {
 
-	/* Keep track of the number of entries in the set */
+    if (set->equal_func (data, rover->data) != 0) {
 
-	++set->entries;
+      /* This data is already in the set */
 
-	/* Added successfully */
+      return 0;
+      }
 
-	return 1;
-}
+    rover = rover->next;
+    }
 
-int set_remove(Set *set, SetValue data)
-{
-	SetEntry **rover;
-	SetEntry *entry;
-	unsigned int index;
+  /* Not in the set.  We must add a new entry. */
 
-	/* Look up the data by its hash key */
+  /* Make a new entry for this data */
 
-	index = set->hash_func(data) % set->table_size;
+  newentry = (SetEntry*) malloc (sizeof (SetEntry));
 
-	/* Search this chain, until the corresponding entry is found */
+  if (newentry == NULL) {
+    return 0;
+    }
 
-	rover = &set->table[index];
+  newentry->data = data;
 
-	while (*rover != NULL) {
-		if (set->equal_func(data, (*rover)->data) != 0) {
+  /* Link into chain */
 
-			/* Found the entry */
+  newentry->next = set->table[index];
+  set->table[index] = newentry;
 
-			entry = *rover;
+  /* Keep track of the number of entries in the set */
 
-			/* Unlink from the linked list */
+  ++set->entries;
 
-			*rover = entry->next;
+  /* Added successfully */
 
-			/* Update counter */
+  return 1;
+  }
 
-			--set->entries;
+int set_remove (Set* set, SetValue data) {
+  SetEntry** rover;
+  SetEntry* entry;
+  unsigned int index;
 
-			/* Free the entry and return */
+  /* Look up the data by its hash key */
 
-			set_free_entry(set, entry);
+  index = set->hash_func (data) % set->table_size;
 
-			return 1;
-		}
+  /* Search this chain, until the corresponding entry is found */
 
-		/* Advance to the next entry */
+  rover = &set->table[index];
 
-		rover = &((*rover)->next);
-	}
+  while (*rover != NULL) {
+    if (set->equal_func (data, (*rover)->data) != 0) {
 
-	/* Not found in set */
+      /* Found the entry */
 
-	return 0;
-}
+      entry = *rover;
 
-int set_query(Set *set, SetValue data)
-{
-	SetEntry *rover;
-	unsigned int index;
+      /* Unlink from the linked list */
 
-	/* Look up the data by its hash key */
+      *rover = entry->next;
 
-	index = set->hash_func(data) % set->table_size;
+      /* Update counter */
 
-	/* Search this chain, until the corresponding entry is found */
+      --set->entries;
 
-	rover = set->table[index];
+      /* Free the entry and return */
 
-	while (rover != NULL) {
-		if (set->equal_func(data, rover->data) != 0) {
+      set_free_entry (set, entry);
 
-			/* Found the entry */
+      return 1;
+      }
 
-			return 1;
-		}
+    /* Advance to the next entry */
 
-		/* Advance to the next entry in the chain */
+    rover = & ( (*rover)->next);
+    }
 
-		rover = rover->next;
-	}
+  /* Not found in set */
 
-	/* Not found */
+  return 0;
+  }
 
-	return 0;
-}
+int set_query (Set* set, SetValue data) {
+  SetEntry* rover;
+  unsigned int index;
 
-unsigned int set_num_entries(Set *set)
-{
-	return set->entries;
-}
+  /* Look up the data by its hash key */
 
-SetValue *set_to_array(Set *set)
-{
-	SetValue *array;
-	int array_counter;
-	unsigned int i;
-	SetEntry *rover;
+  index = set->hash_func (data) % set->table_size;
 
-	/* Create an array to hold the set entries */
+  /* Search this chain, until the corresponding entry is found */
 
-	array = malloc(sizeof(SetValue) * set->entries);
+  rover = set->table[index];
 
-	if (array == NULL) {
-		return NULL;
-	}
+  while (rover != NULL) {
+    if (set->equal_func (data, rover->data) != 0) {
 
-	array_counter = 0;
+      /* Found the entry */
 
-	/* Iterate over all entries in all chains */
+      return 1;
+      }
 
-	for (i=0; i<set->table_size; ++i) {
+    /* Advance to the next entry in the chain */
 
-		rover = set->table[i];
+    rover = rover->next;
+    }
 
-		while (rover != NULL) {
+  /* Not found */
 
-			/* Add this value to the array */
+  return 0;
+  }
 
-			array[array_counter] = rover->data;
-			++array_counter;
+unsigned int set_num_entries (Set* set) {
+  return set->entries;
+  }
 
-			/* Advance to the next entry */
+SetValue* set_to_array (Set* set) {
+  SetValue* array;
+  int array_counter;
+  unsigned int i;
+  SetEntry* rover;
 
-			rover = rover->next;
-		}
-	}
+  /* Create an array to hold the set entries */
 
-	return array;
-}
+  array = malloc (sizeof (SetValue) * set->entries);
 
-Set *set_union(Set *set1, Set *set2)
-{
-	SetIterator iterator;
-	Set *new_set;
-	SetValue value;
+  if (array == NULL) {
+    return NULL;
+    }
 
-	new_set = set_new(set1->hash_func, set1->equal_func);
+  array_counter = 0;
 
-	if (new_set == NULL) {
-		return NULL;
-	}
+  /* Iterate over all entries in all chains */
 
-	/* Add all values from the first set */
-	
-	set_iterate(set1, &iterator);
+  for (i = 0; i < set->table_size; ++i) {
 
-	while (set_iter_has_more(&iterator)) {
+    rover = set->table[i];
 
-		/* Read the next value */
+    while (rover != NULL) {
 
-		value = set_iter_next(&iterator);
+      /* Add this value to the array */
 
-		/* Copy the value into the new set */
+      array[array_counter] = rover->data;
+      ++array_counter;
 
-		if (!set_insert(new_set, value)) {
+      /* Advance to the next entry */
 
-			/* Failed to insert */
-			
-			set_free(new_set);
-			return NULL;
-		}
-	}
-	
-	/* Add all values from the second set */
-	
-	set_iterate(set2, &iterator);
+      rover = rover->next;
+      }
+    }
 
-	while (set_iter_has_more(&iterator)) {
+  return array;
+  }
 
-		/* Read the next value */
+Set* set_union (Set* set1, Set* set2) {
+  SetIterator iterator;
+  Set* new_set;
+  SetValue value;
 
-		value = set_iter_next(&iterator);
+  new_set = set_new (set1->hash_func, set1->equal_func);
 
-		/* Has this value been put into the new set already? 
-		 * If so, do not insert this again */
+  if (new_set == NULL) {
+    return NULL;
+    }
 
-		if (set_query(new_set, value) == 0) {
-			if (!set_insert(new_set, value)) {
+  /* Add all values from the first set */
 
-				/* Failed to insert */
+  set_iterate (set1, &iterator);
 
-				set_free(new_set);
-				return NULL;
-			}
-		}
-	}
+  while (set_iter_has_more (&iterator)) {
 
-	return new_set;
-}
+    /* Read the next value */
 
-Set *set_intersection(Set *set1, Set *set2)
-{
-	Set *new_set;
-	SetIterator iterator;
-	SetValue value;
+    value = set_iter_next (&iterator);
 
-	new_set = set_new(set1->hash_func, set2->equal_func);
+    /* Copy the value into the new set */
 
-	if (new_set == NULL) {
-		return NULL;
-	}
+    if (!set_insert (new_set, value)) {
 
-	/* Iterate over all values in set 1. */
+      /* Failed to insert */
 
-	set_iterate(set1, &iterator);
+      set_free (new_set);
+      return NULL;
+      }
+    }
 
-	while (set_iter_has_more(&iterator)) {
+  /* Add all values from the second set */
 
-		/* Get the next value */
+  set_iterate (set2, &iterator);
 
-		value = set_iter_next(&iterator);
+  while (set_iter_has_more (&iterator)) {
 
-		/* Is this value in set 2 as well?  If so, it should be 
-		 * in the new set. */
+    /* Read the next value */
 
-		if (set_query(set2, value) != 0) {
+    value = set_iter_next (&iterator);
 
-			/* Copy the value first before inserting, 
-			 * if necessary */
+    /* Has this value been put into the new set already?
+     * If so, do not insert this again */
 
-			if (!set_insert(new_set, value)) {
-				set_free(new_set);
+    if (set_query (new_set, value) == 0) {
+      if (!set_insert (new_set, value)) {
 
-				return NULL;
-			}
-		}
-	}
+        /* Failed to insert */
 
-	return new_set;
-}
+        set_free (new_set);
+        return NULL;
+        }
+      }
+    }
 
-void set_iterate(Set *set, SetIterator *iter)
-{
-	unsigned int chain;
+  return new_set;
+  }
 
-	iter->set = set;
-	iter->next_entry = NULL;
+Set* set_intersection (Set* set1, Set* set2) {
+  Set* new_set;
+  SetIterator iterator;
+  SetValue value;
 
-	/* Find the first entry */
+  new_set = set_new (set1->hash_func, set2->equal_func);
 
-	for (chain = 0; chain < set->table_size; ++chain) {
+  if (new_set == NULL) {
+    return NULL;
+    }
 
-		/* There is a value at the start of this chain */
+  /* Iterate over all values in set 1. */
 
-		if (set->table[chain] != NULL) {
-			iter->next_entry = set->table[chain];
-			break;
-		}
-	}
+  set_iterate (set1, &iterator);
 
-	iter->next_chain = chain;
-}
+  while (set_iter_has_more (&iterator)) {
 
-SetValue set_iter_next(SetIterator *iterator)
-{
-	Set *set;
-	SetValue result;
-	SetEntry *current_entry;
-	unsigned int chain;
+    /* Get the next value */
 
-	set = iterator->set;
+    value = set_iter_next (&iterator);
 
-	/* No more entries? */
+    /* Is this value in set 2 as well?  If so, it should be
+     * in the new set. */
 
-	if (iterator->next_entry == NULL) {
-		return SET_NULL;
-	}
+    if (set_query (set2, value) != 0) {
 
-	/* We have the result immediately */
+      /* Copy the value first before inserting,
+       * if necessary */
 
-	current_entry = iterator->next_entry;
-	result = current_entry->data;
+      if (!set_insert (new_set, value)) {
+        set_free (new_set);
 
-	/* Advance next_entry to the next SetEntry in the Set. */
+        return NULL;
+        }
+      }
+    }
 
-	if (current_entry->next != NULL) {
+  return new_set;
+  }
 
-		/* Use the next value in this chain */
+void set_iterate (Set* set, SetIterator* iter) {
+  unsigned int chain;
 
-		iterator->next_entry = current_entry->next;
+  iter->set = set;
+  iter->next_entry = NULL;
 
-	} else {
+  /* Find the first entry */
 
-		/* Default value if no valid chain is found */
+  for (chain = 0; chain < set->table_size; ++chain) {
 
-		iterator->next_entry = NULL;
+    /* There is a value at the start of this chain */
 
-		/* No more entries in this chain.  Search the next chain */
+    if (set->table[chain] != NULL) {
+      iter->next_entry = set->table[chain];
+      break;
+      }
+    }
 
-		chain = iterator->next_chain + 1;
+  iter->next_chain = chain;
+  }
 
-		while (chain < set->table_size) {
+SetValue set_iter_next (SetIterator* iterator) {
+  Set* set;
+  SetValue result;
+  SetEntry* current_entry;
+  unsigned int chain;
 
-			/* Is there a chain at this table entry? */
+  set = iterator->set;
 
-			if (set->table[chain] != NULL) {
+  /* No more entries? */
 
-				/* Valid chain found! */
+  if (iterator->next_entry == NULL) {
+    return SET_NULL;
+    }
 
-				iterator->next_entry = set->table[chain];
+  /* We have the result immediately */
 
-				break;
-			}
+  current_entry = iterator->next_entry;
+  result = current_entry->data;
 
-			/* Keep searching until we find an empty chain */
+  /* Advance next_entry to the next SetEntry in the Set. */
 
-			++chain;
-		}
+  if (current_entry->next != NULL) {
 
-		iterator->next_chain = chain;
-	}
+    /* Use the next value in this chain */
 
-	return result;
-}
+    iterator->next_entry = current_entry->next;
 
-int set_iter_has_more(SetIterator *iterator)
-{
-	return iterator->next_entry != NULL;
-}
+    }
+
+  else {
+
+    /* Default value if no valid chain is found */
+
+    iterator->next_entry = NULL;
+
+    /* No more entries in this chain.  Search the next chain */
+
+    chain = iterator->next_chain + 1;
+
+    while (chain < set->table_size) {
+
+      /* Is there a chain at this table entry? */
+
+      if (set->table[chain] != NULL) {
+
+        /* Valid chain found! */
+
+        iterator->next_entry = set->table[chain];
+
+        break;
+        }
+
+      /* Keep searching until we find an empty chain */
+
+      ++chain;
+      }
+
+    iterator->next_chain = chain;
+    }
+
+  return result;
+  }
+
+int set_iter_has_more (SetIterator* iterator) {
+  return iterator->next_entry != NULL;
+  }
 

@@ -2,19 +2,19 @@
 
 Copyright (c) 2005-2008, Simon Howard
 
-Permission to use, copy, modify, and/or distribute this software 
-for any purpose with or without fee is hereby granted, provided 
-that the above copyright notice and this permission notice appear 
-in all copies. 
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted, provided
+that the above copyright notice and this permission notice appear
+in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE 
-AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN      
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
 
@@ -23,7 +23,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#include "trie.h"
+#include "calg/trie.h"
 
 /* malloc() / free() testing */
 
@@ -34,550 +34,550 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 typedef struct _TrieNode TrieNode;
 
 struct _TrieNode {
-	TrieValue data;
-	unsigned int use_count;
-	TrieNode *next[256];
-};
+  TrieValue data;
+  unsigned int use_count;
+  TrieNode* next[256];
+  };
 
 struct _Trie {
-	TrieNode *root_node;
-};
+  TrieNode* root_node;
+  };
 
-Trie *trie_new(void)
-{
-	Trie *new_trie;
+Trie* trie_new (void) {
+  Trie* new_trie;
 
-	new_trie = (Trie *) malloc(sizeof(Trie));
+  new_trie = (Trie*) malloc (sizeof (Trie));
 
-	if (new_trie == NULL) {
-		return NULL;
-	}
-	
-	new_trie->root_node = NULL;
+  if (new_trie == NULL) {
+    return NULL;
+    }
 
-	return new_trie;
-}
+  new_trie->root_node = NULL;
 
-static void trie_free_list_push(TrieNode **list, TrieNode *node)
-{
-	node->data = *list;
-	*list = node;
-}
+  return new_trie;
+  }
 
-static TrieNode *trie_free_list_pop(TrieNode **list)
-{
-	TrieNode *result;
+static void trie_free_list_push (TrieNode** list, TrieNode* node) {
+  node->data = *list;
+  *list = node;
+  }
 
-	result = *list;
-	*list = result->data;
+static TrieNode* trie_free_list_pop (TrieNode** list) {
+  TrieNode* result;
 
-	return result;
-}
+  result = *list;
+  *list = result->data;
 
-void trie_free(Trie *trie)
-{
-	TrieNode *free_list;
-	TrieNode *node;
-	int i;
+  return result;
+  }
 
-	free_list = NULL;
+void trie_free (Trie* trie) {
+  TrieNode* free_list;
+  TrieNode* node;
+  int i;
 
-	/* Start with the root node */
+  free_list = NULL;
 
-	if (trie->root_node != NULL) {
-		trie_free_list_push(&free_list, trie->root_node);
-	}
+  /* Start with the root node */
 
-	/* Go through the free list, freeing nodes.  We add new nodes as 
-	 * we encounter them; in this way, all the nodes are freed
-	 * non-recursively. */
+  if (trie->root_node != NULL) {
+    trie_free_list_push (&free_list, trie->root_node);
+    }
 
-	while (free_list != NULL) {
-		node = trie_free_list_pop(&free_list);
+  /* Go through the free list, freeing nodes.  We add new nodes as
+   * we encounter them; in this way, all the nodes are freed
+   * non-recursively. */
 
-		/* Add all children of this node to the free list */
+  while (free_list != NULL) {
+    node = trie_free_list_pop (&free_list);
 
-		for (i=0; i<256; ++i) {
-			if (node->next[i] != NULL) {
-				trie_free_list_push(&free_list, node->next[i]);
-			}
-		}
+    /* Add all children of this node to the free list */
 
-		/* Free the node */
+    for (i = 0; i < 256; ++i) {
+      if (node->next[i] != NULL) {
+        trie_free_list_push (&free_list, node->next[i]);
+        }
+      }
 
-		free(node);
-	}
+    /* Free the node */
 
-	/* Free the trie */
+    free (node);
+    }
 
-	free(trie);
-}
+  /* Free the trie */
 
-static TrieNode *trie_find_end(Trie *trie, char *key)
-{
-	TrieNode *node;
-	char *p;
+  free (trie);
+  }
 
-	/* Search down the trie until the end of string is reached */
+static TrieNode* trie_find_end (Trie* trie, char* key) {
+  TrieNode* node;
+  char* p;
 
-	node = trie->root_node;
+  /* Search down the trie until the end of string is reached */
 
-	for (p=key; *p != '\0'; ++p) {
+  node = trie->root_node;
 
-		if (node == NULL) {
-			/* Not found in the tree. Return. */
+  for (p = key; *p != '\0'; ++p) {
 
-			return NULL;
-		}
+    if (node == NULL) {
+      /* Not found in the tree. Return. */
 
-		/* Jump to the next node */
+      return NULL;
+      }
 
-		node = node->next[(unsigned char) *p];
-	}
+    /* Jump to the next node */
 
-	/* This key is present if the value at the last node is not NULL */
+    node = node->next[ (unsigned char) * p];
+    }
 
-	return node;
-}
+  /* This key is present if the value at the last node is not NULL */
 
-static TrieNode *trie_find_end_binary(Trie *trie, unsigned char *key,
-                                      int key_length)
-{
-	TrieNode *node;
-	int j;
-	int c;
+  return node;
+  }
 
-	/* Search down the trie until the end of string is reached */
+static TrieNode* trie_find_end_binary (Trie* trie, unsigned char* key,
+                                       int key_length) {
+  TrieNode* node;
+  int j;
+  int c;
 
-	node = trie->root_node;
+  /* Search down the trie until the end of string is reached */
 
-	for (j=0; j<key_length; j++) {
+  node = trie->root_node;
 
-		if (node == NULL) {
-			/* Not found in the tree. Return. */
-			return NULL;
-		}
+  for (j = 0; j < key_length; j++) {
 
-		c = (unsigned char) key[j];
+    if (node == NULL) {
+      /* Not found in the tree. Return. */
+      return NULL;
+      }
 
-		/* Jump to the next node */
+    c = (unsigned char) key[j];
 
-		node = node->next[c];
-	}
+    /* Jump to the next node */
 
-	/* This key is present if the value at the last node is not NULL */
+    node = node->next[c];
+    }
 
-	return node;
-}
+  /* This key is present if the value at the last node is not NULL */
+
+  return node;
+  }
 
 /* Roll back an insert operation after a failed malloc() call. */
 
-static void trie_insert_rollback(Trie *trie, unsigned char *key)
-{
-	TrieNode *node;
-	TrieNode **prev_ptr;
-	TrieNode *next_node;
-	TrieNode **next_prev_ptr;
-	unsigned char *p;
+static void trie_insert_rollback (Trie* trie, unsigned char* key) {
+  TrieNode* node;
+  TrieNode** prev_ptr;
+  TrieNode* next_node;
+  TrieNode** next_prev_ptr;
+  unsigned char* p;
 
-	/* Follow the chain along.  We know that we will never reach the 
-	 * end of the string because trie_insert never got that far.  As a
-	 * result, it is not necessary to check for the end of string
-	 * delimiter (NUL) */
+  /* Follow the chain along.  We know that we will never reach the
+   * end of the string because trie_insert never got that far.  As a
+   * result, it is not necessary to check for the end of string
+   * delimiter (NUL) */
 
-	node = trie->root_node;
-	prev_ptr = &trie->root_node;
-	p = key;
+  node = trie->root_node;
+  prev_ptr = &trie->root_node;
+  p = key;
 
-	while (node != NULL) {
+  while (node != NULL) {
 
-		/* Find the next node now. We might free this node. */
+    /* Find the next node now. We might free this node. */
 
-		next_prev_ptr = &node->next[(unsigned char) *p];
-		next_node = *next_prev_ptr;
-		++p;
+    next_prev_ptr = &node->next[ (unsigned char) * p];
+    next_node = *next_prev_ptr;
+    ++p;
 
-		/* Decrease the use count and free the node if it 
-		 * reaches zero. */
+    /* Decrease the use count and free the node if it
+     * reaches zero. */
 
-		--node->use_count;
+    --node->use_count;
 
-		if (node->use_count == 0) {
-			free(node);
+    if (node->use_count == 0) {
+      free (node);
 
-			if (prev_ptr != NULL) {
-				*prev_ptr = NULL;
-			}
+      if (prev_ptr != NULL) {
+        *prev_ptr = NULL;
+        }
 
-			next_prev_ptr = NULL;
-		}
+      next_prev_ptr = NULL;
+      }
 
-		/* Update pointers */
+    /* Update pointers */
 
-		node = next_node;
-		prev_ptr = next_prev_ptr;
-	}
-}
+    node = next_node;
+    prev_ptr = next_prev_ptr;
+    }
+  }
 
-int trie_insert(Trie *trie, char *key, TrieValue value)
-{
-	TrieNode **rover;
-	TrieNode *node;
-	char *p;
-	int c;
+int trie_insert (Trie* trie, char* key, TrieValue value) {
+  TrieNode** rover;
+  TrieNode* node;
+  char* p;
+  int c;
 
-	/* Cannot insert NULL values */
+  /* Cannot insert NULL values */
 
-	if (value == TRIE_NULL) {
-		return 0;
-	}
-		
-	/* Search to see if this is already in the tree */
+  if (value == TRIE_NULL) {
+    return 0;
+    }
 
-	node = trie_find_end(trie, key);
+  /* Search to see if this is already in the tree */
 
-	/* Already in the tree? If so, replace the existing value and 
-	 * return success. */
+  node = trie_find_end (trie, key);
 
-	if (node != NULL && node->data != TRIE_NULL) {
-		node->data = value;
-		return 1;
-	}
+  /* Already in the tree? If so, replace the existing value and
+   * return success. */
 
-	/* Search down the trie until we reach the end of string,
-	 * creating nodes as necessary */
+  if (node != NULL && node->data != TRIE_NULL) {
+    node->data = value;
+    return 1;
+    }
 
-	rover = &trie->root_node;
-	p = key;
+  /* Search down the trie until we reach the end of string,
+   * creating nodes as necessary */
 
-	for (;;) {
+  rover = &trie->root_node;
+  p = key;
 
-		node = *rover;
+  for (;;) {
 
-		if (node == NULL) {
+    node = *rover;
 
-			/* Node does not exist, so create it */
+    if (node == NULL) {
 
-			node = (TrieNode *) calloc(1, sizeof(TrieNode));
+      /* Node does not exist, so create it */
 
-			if (node == NULL) {
-  
-				/* Allocation failed.  Go back and undo
-				 * what we have done so far. */
+      node = (TrieNode*) calloc (1, sizeof (TrieNode));
 
-				trie_insert_rollback(trie, (unsigned char *) key);
-		
-				return 0;
-			}
+      if (node == NULL) {
 
-			node->data = TRIE_NULL;
+        /* Allocation failed.  Go back and undo
+         * what we have done so far. */
 
-			/* Link in to the trie */
+        trie_insert_rollback (trie, (unsigned char*) key);
 
-			*rover = node;
-		}
+        return 0;
+        }
 
-		/* Increase the node use count */
+      node->data = TRIE_NULL;
 
-		++node->use_count;
+      /* Link in to the trie */
 
-		/* Current character */
+      *rover = node;
+      }
 
-		c = (unsigned char) *p;
+    /* Increase the node use count */
 
-		/* Reached the end of string?  If so, we're finished. */
+    ++node->use_count;
 
-		if (c == '\0') {
+    /* Current character */
 
-			/* Set the data at the node we have reached */
+    c = (unsigned char) * p;
 
-			node->data = value;
+    /* Reached the end of string?  If so, we're finished. */
 
-			break;
-		}
+    if (c == '\0') {
 
-		/* Advance to the next node in the chain */
+      /* Set the data at the node we have reached */
 
-		rover = &node->next[c];
-		++p;
-	}
+      node->data = value;
 
-	return 1;
-}
+      break;
+      }
 
+    /* Advance to the next node in the chain */
 
-int trie_insert_binary(Trie *trie, unsigned char *key, int key_length,
-                       TrieValue value)
-{
-	TrieNode **rover;
-	TrieNode *node;
-	int p,c;
+    rover = &node->next[c];
+    ++p;
+    }
 
-	/* Cannot insert NULL values */
+  return 1;
+  }
 
-	if (value == TRIE_NULL) {
-		return 0;
-	}
-		
-	/* Search to see if this is already in the tree */
 
-	node = trie_find_end_binary(trie, key, key_length);
+int trie_insert_binary (Trie* trie, unsigned char* key, int key_length,
+                        TrieValue value) {
+  TrieNode** rover;
+  TrieNode* node;
+  int p, c;
 
-	/* Already in the tree? If so, replace the existing value and 
-	 * return success. */
+  /* Cannot insert NULL values */
 
-	if (node != NULL && node->data != TRIE_NULL) {
-		node->data = value;
-		return 1;
-	}
+  if (value == TRIE_NULL) {
+    return 0;
+    }
 
-	/* Search down the trie until we reach the end of string,
-	 * creating nodes as necessary */
+  /* Search to see if this is already in the tree */
 
-	rover = &trie->root_node;
-	p = 0;
+  node = trie_find_end_binary (trie, key, key_length);
 
-	for (;;) {
+  /* Already in the tree? If so, replace the existing value and
+   * return success. */
 
-		node = *rover;
+  if (node != NULL && node->data != TRIE_NULL) {
+    node->data = value;
+    return 1;
+    }
 
-		if (node == NULL) {
+  /* Search down the trie until we reach the end of string,
+   * creating nodes as necessary */
 
-			/* Node does not exist, so create it */
+  rover = &trie->root_node;
+  p = 0;
 
-			node = (TrieNode *) calloc(1, sizeof(TrieNode));
+  for (;;) {
 
-			if (node == NULL) {
-  
-				/* Allocation failed.  Go back and undo
-				 * what we have done so far. */
+    node = *rover;
 
-				trie_insert_rollback(trie, key);
+    if (node == NULL) {
 
-				return 0;
-			}
+      /* Node does not exist, so create it */
 
-			node->data = TRIE_NULL;
+      node = (TrieNode*) calloc (1, sizeof (TrieNode));
 
-			/* Link in to the trie */
+      if (node == NULL) {
 
-			*rover = node;
-		}
+        /* Allocation failed.  Go back and undo
+         * what we have done so far. */
 
-		/* Increase the node use count */
+        trie_insert_rollback (trie, key);
 
-		++node->use_count;
+        return 0;
+        }
 
-		/* Current character */
+      node->data = TRIE_NULL;
 
-		c = (unsigned char) key[p];
+      /* Link in to the trie */
 
-		/* Reached the end of string?  If so, we're finished. */
+      *rover = node;
+      }
 
-		if (p == key_length) {
+    /* Increase the node use count */
 
-			/* Set the data at the node we have reached */
+    ++node->use_count;
 
-			node->data = value;
+    /* Current character */
 
-			break;
-		}
+    c = (unsigned char) key[p];
 
-		/* Advance to the next node in the chain */
+    /* Reached the end of string?  If so, we're finished. */
 
-		rover = &node->next[c];
-		++p;
-	}
+    if (p == key_length) {
 
-	return 1;
-}
+      /* Set the data at the node we have reached */
 
-int trie_remove_binary(Trie *trie, unsigned char *key, int key_length)
-{
-	TrieNode *node;
-	TrieNode *next;
-	TrieNode **last_next_ptr;
-	int p, c;
-	
-	/* Find the end node and remove the value */
+      node->data = value;
 
-	node = trie_find_end_binary(trie, key, key_length);
+      break;
+      }
 
-	if (node != NULL && node->data != TRIE_NULL) {
-		node->data = TRIE_NULL;
-	} else {
-		return 0;
-	}
+    /* Advance to the next node in the chain */
 
-	/* Now traverse the tree again as before, decrementing the use
-	 * count of each node.  Free back nodes as necessary. */
+    rover = &node->next[c];
+    ++p;
+    }
 
-	node = trie->root_node;
-	last_next_ptr = &trie->root_node;
-	p = 0;
+  return 1;
+  }
 
-	for (;;) {
+int trie_remove_binary (Trie* trie, unsigned char* key, int key_length) {
+  TrieNode* node;
+  TrieNode* next;
+  TrieNode** last_next_ptr;
+  int p, c;
 
-		/* Find the next node */
-		c = (unsigned char) key[p];
-		next = node->next[c];
+  /* Find the end node and remove the value */
 
-		/* Free this node if necessary */
+  node = trie_find_end_binary (trie, key, key_length);
 
-		--node->use_count;
+  if (node != NULL && node->data != TRIE_NULL) {
+    node->data = TRIE_NULL;
+    }
 
-		if (node->use_count <= 0) {
-			free(node);
+  else {
+    return 0;
+    }
 
-			/* Set the "next" pointer on the previous node to NULL,
-			 * to unlink the freed node from the tree.  This only
-			 * needs to be done once in a remove.  After the first
-			 * unlink, all further nodes are also going to be
-			 * free'd. */
+  /* Now traverse the tree again as before, decrementing the use
+   * count of each node.  Free back nodes as necessary. */
 
-			if (last_next_ptr != NULL) {
-				*last_next_ptr = NULL;
-				last_next_ptr = NULL;
-			}
-		}
-		
-		/* Go to the next character or finish */
-		if (p == key_length) {
-			break;
-		} else {
-			++p;
-		}
+  node = trie->root_node;
+  last_next_ptr = &trie->root_node;
+  p = 0;
 
-		/* If necessary, save the location of the "next" pointer
-		 * so that it may be set to NULL on the next iteration if
-		 * the next node visited is freed. */
+  for (;;) {
 
-		if (last_next_ptr != NULL) {
-			last_next_ptr = &node->next[c];
-		}
-		
-		/* Jump to the next node */
+    /* Find the next node */
+    c = (unsigned char) key[p];
+    next = node->next[c];
 
-		node = next;
-	}
+    /* Free this node if necessary */
 
-	/* Removed successfully */
+    --node->use_count;
 
-	return 1;
-}
+    if (node->use_count <= 0) {
+      free (node);
 
-int trie_remove(Trie *trie, char *key)
-{
-	TrieNode *node;
-	TrieNode *next;
-	TrieNode **last_next_ptr;
-	char *p;
-	int c;
-	
-	/* Find the end node and remove the value */
+      /* Set the "next" pointer on the previous node to NULL,
+       * to unlink the freed node from the tree.  This only
+       * needs to be done once in a remove.  After the first
+       * unlink, all further nodes are also going to be
+       * free'd. */
 
-	node = trie_find_end(trie, key);
+      if (last_next_ptr != NULL) {
+        *last_next_ptr = NULL;
+        last_next_ptr = NULL;
+        }
+      }
 
-	if (node != NULL && node->data != TRIE_NULL) {
-		node->data = TRIE_NULL;
-	} else {
-		return 0;
-	}
+    /* Go to the next character or finish */
+    if (p == key_length) {
+      break;
+      }
 
-	/* Now traverse the tree again as before, decrementing the use
-	 * count of each node.  Free back nodes as necessary. */
+    else {
+      ++p;
+      }
 
-	node = trie->root_node;
-	last_next_ptr = &trie->root_node;
-	p = key;
+    /* If necessary, save the location of the "next" pointer
+     * so that it may be set to NULL on the next iteration if
+     * the next node visited is freed. */
 
-	for (;;) {
+    if (last_next_ptr != NULL) {
+      last_next_ptr = &node->next[c];
+      }
 
-		/* Find the next node */
-		
-		c = (unsigned char) *p;
-		next = node->next[c];
+    /* Jump to the next node */
 
-		/* Free this node if necessary */
+    node = next;
+    }
 
-		--node->use_count;
+  /* Removed successfully */
 
-		if (node->use_count <= 0) {
-			free(node);
+  return 1;
+  }
 
-			/* Set the "next" pointer on the previous node to NULL,
-			 * to unlink the freed node from the tree.  This only
-			 * needs to be done once in a remove.  After the first
-			 * unlink, all further nodes are also going to be
-			 * free'd. */
+int trie_remove (Trie* trie, char* key) {
+  TrieNode* node;
+  TrieNode* next;
+  TrieNode** last_next_ptr;
+  char* p;
+  int c;
 
-			if (last_next_ptr != NULL) {
-				*last_next_ptr = NULL;
-				last_next_ptr = NULL;
-			}
-		}
-		
-		/* Go to the next character or finish */
+  /* Find the end node and remove the value */
 
-		if (c == '\0') {
-			break;
-		} else {
-			++p;
-		}
+  node = trie_find_end (trie, key);
 
-		/* If necessary, save the location of the "next" pointer
-		 * so that it may be set to NULL on the next iteration if
-		 * the next node visited is freed. */
+  if (node != NULL && node->data != TRIE_NULL) {
+    node->data = TRIE_NULL;
+    }
 
-		if (last_next_ptr != NULL) {
-			last_next_ptr = &node->next[c];
-		}
-		
-		/* Jump to the next node */
+  else {
+    return 0;
+    }
 
-		node = next;
-	}
+  /* Now traverse the tree again as before, decrementing the use
+   * count of each node.  Free back nodes as necessary. */
 
-	/* Removed successfully */
+  node = trie->root_node;
+  last_next_ptr = &trie->root_node;
+  p = key;
 
-	return 1;
-}
+  for (;;) {
 
-TrieValue trie_lookup(Trie *trie, char *key)
-{
-	TrieNode *node;
+    /* Find the next node */
 
-	node = trie_find_end(trie, key);
+    c = (unsigned char) * p;
+    next = node->next[c];
 
-	if (node != NULL) {
-		return node->data;
-	} else {
-		return TRIE_NULL;
-	}
-}
+    /* Free this node if necessary */
 
-TrieValue trie_lookup_binary(Trie *trie, unsigned char *key, int key_length)
-{
-	TrieNode *node;
+    --node->use_count;
 
-	node = trie_find_end_binary(trie, key, key_length);
+    if (node->use_count <= 0) {
+      free (node);
 
-	if (node != NULL) {
-		return node->data;
-	} else {
-		return TRIE_NULL;
-	}
-}
+      /* Set the "next" pointer on the previous node to NULL,
+       * to unlink the freed node from the tree.  This only
+       * needs to be done once in a remove.  After the first
+       * unlink, all further nodes are also going to be
+       * free'd. */
 
-unsigned int trie_num_entries(Trie *trie)
-{
-	/* To find the number of entries, simply look at the use count
-	 * of the root node. */
+      if (last_next_ptr != NULL) {
+        *last_next_ptr = NULL;
+        last_next_ptr = NULL;
+        }
+      }
 
-	if (trie->root_node == NULL) {
-		return 0;
-	} else {
-		return trie->root_node->use_count;
-	}
-}
+    /* Go to the next character or finish */
+
+    if (c == '\0') {
+      break;
+      }
+
+    else {
+      ++p;
+      }
+
+    /* If necessary, save the location of the "next" pointer
+     * so that it may be set to NULL on the next iteration if
+     * the next node visited is freed. */
+
+    if (last_next_ptr != NULL) {
+      last_next_ptr = &node->next[c];
+      }
+
+    /* Jump to the next node */
+
+    node = next;
+    }
+
+  /* Removed successfully */
+
+  return 1;
+  }
+
+TrieValue trie_lookup (Trie* trie, char* key) {
+  TrieNode* node;
+
+  node = trie_find_end (trie, key);
+
+  if (node != NULL) {
+    return node->data;
+    }
+
+  else {
+    return TRIE_NULL;
+    }
+  }
+
+TrieValue trie_lookup_binary (Trie* trie, unsigned char* key, int key_length) {
+  TrieNode* node;
+
+  node = trie_find_end_binary (trie, key, key_length);
+
+  if (node != NULL) {
+    return node->data;
+    }
+
+  else {
+    return TRIE_NULL;
+    }
+  }
+
+unsigned int trie_num_entries (Trie* trie) {
+  /* To find the number of entries, simply look at the use count
+   * of the root node. */
+
+  if (trie->root_node == NULL) {
+    return 0;
+    }
+
+  else {
+    return trie->root_node->use_count;
+    }
+  }
 
