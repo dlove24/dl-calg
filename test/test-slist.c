@@ -2,19 +2,19 @@
 
 Copyright (c) 2005-2008, Simon Howard
 
-Permission to use, copy, modify, and/or distribute this software 
-for any purpose with or without fee is hereby granted, provided 
-that the above copyright notice and this permission notice appear 
-in all copies. 
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted, provided
+that the above copyright notice and this permission notice appear
+in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE 
-AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN      
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
 
@@ -32,509 +32,494 @@ int variable1 = 50, variable2, variable3, variable4;
 
 /* Returns a list containing four entries */
 
-SListEntry *generate_list(void)
-{
-	SListEntry *list = NULL;
+SListEntry* generate_list (void) {
+  SListEntry* list = NULL;
 
-	assert(slist_append(&list, &variable1) != NULL);
-	assert(slist_append(&list, &variable2) != NULL);
-	assert(slist_append(&list, &variable3) != NULL);
-	assert(slist_append(&list, &variable4) != NULL);
+  assert (slist_append (&list, &variable1) != NULL);
+  assert (slist_append (&list, &variable2) != NULL);
+  assert (slist_append (&list, &variable3) != NULL);
+  assert (slist_append (&list, &variable4) != NULL);
 
-	return list;
-}
+  return list;
+  }
 
-void test_slist_append(void)
-{
-	SListEntry *list = NULL;
+void test_slist_append (void) {
+  SListEntry* list = NULL;
 
-	assert(slist_append(&list, &variable1) != NULL);
-	assert(slist_append(&list, &variable2) != NULL);
-	assert(slist_append(&list, &variable3) != NULL);
-	assert(slist_append(&list, &variable4) != NULL);
-	assert(slist_length(list) == 4);
-
-	assert(slist_nth_data(list, 0) == &variable1);
-	assert(slist_nth_data(list, 1) == &variable2);
-	assert(slist_nth_data(list, 2) == &variable3);
-	assert(slist_nth_data(list, 3) == &variable4);
+  assert (slist_append (&list, &variable1) != NULL);
+  assert (slist_append (&list, &variable2) != NULL);
+  assert (slist_append (&list, &variable3) != NULL);
+  assert (slist_append (&list, &variable4) != NULL);
+  assert (slist_length (list) == 4);
 
-	/* Test out of memory scenario */
+  assert (slist_nth_data (list, 0) == &variable1);
+  assert (slist_nth_data (list, 1) == &variable2);
+  assert (slist_nth_data (list, 2) == &variable3);
+  assert (slist_nth_data (list, 3) == &variable4);
 
-	alloc_test_set_limit(0);
-	assert(slist_length(list) == 4);
-	assert(slist_append(&list, &variable1) == NULL);
-	assert(slist_length(list) == 4);
+  /* Test out of memory scenario */
 
-	slist_free(list);
-}
+  alloc_test_set_limit (0);
+  assert (slist_length (list) == 4);
+  assert (slist_append (&list, &variable1) == NULL);
+  assert (slist_length (list) == 4);
 
-void test_slist_prepend(void)
-{
-	SListEntry *list = NULL;
+  slist_free (list);
+  }
 
-	assert(slist_prepend(&list, &variable1) != NULL);
-	assert(slist_prepend(&list, &variable2) != NULL);
-	assert(slist_prepend(&list, &variable3) != NULL);
-	assert(slist_prepend(&list, &variable4) != NULL);
+void test_slist_prepend (void) {
+  SListEntry* list = NULL;
 
-	assert(slist_nth_data(list, 0) == &variable4);
-	assert(slist_nth_data(list, 1) == &variable3);
-	assert(slist_nth_data(list, 2) == &variable2);
-	assert(slist_nth_data(list, 3) == &variable1);
+  assert (slist_prepend (&list, &variable1) != NULL);
+  assert (slist_prepend (&list, &variable2) != NULL);
+  assert (slist_prepend (&list, &variable3) != NULL);
+  assert (slist_prepend (&list, &variable4) != NULL);
 
-	/* Test out of memory scenario */
+  assert (slist_nth_data (list, 0) == &variable4);
+  assert (slist_nth_data (list, 1) == &variable3);
+  assert (slist_nth_data (list, 2) == &variable2);
+  assert (slist_nth_data (list, 3) == &variable1);
 
-	alloc_test_set_limit(0);
-	assert(slist_length(list) == 4);
-	assert(slist_prepend(&list, &variable1) == NULL);
-	assert(slist_length(list) == 4);
+  /* Test out of memory scenario */
 
-	slist_free(list);
-}
+  alloc_test_set_limit (0);
+  assert (slist_length (list) == 4);
+  assert (slist_prepend (&list, &variable1) == NULL);
+  assert (slist_length (list) == 4);
 
-void test_slist_free(void)
-{
-	SListEntry *list;
+  slist_free (list);
+  }
 
-	/* Create a list and free it */
+void test_slist_free (void) {
+  SListEntry* list;
 
-	list = generate_list();
+  /* Create a list and free it */
 
-	slist_free(list);
+  list = generate_list();
 
-	/* Check the empty list frees correctly */
+  slist_free (list);
 
-	slist_free(NULL);
-}
+  /* Check the empty list frees correctly */
 
-void test_slist_next(void)
-{
-	SListEntry *list;
-	SListEntry *rover;
+  slist_free (NULL);
+  }
 
-	list = generate_list();
+void test_slist_next (void) {
+  SListEntry* list;
+  SListEntry* rover;
 
-	rover = list;
-	assert(slist_data(rover) == &variable1);
-	rover = slist_next(rover);
-	assert(slist_data(rover) == &variable2);
-	rover = slist_next(rover);
-	assert(slist_data(rover) == &variable3);
-	rover = slist_next(rover);
-	assert(slist_data(rover) == &variable4);
-	rover = slist_next(rover);
-	assert(rover == NULL);
+  list = generate_list();
 
-	slist_free(list);
-}
+  rover = list;
+  assert (slist_data (rover) == &variable1);
+  rover = slist_next (rover);
+  assert (slist_data (rover) == &variable2);
+  rover = slist_next (rover);
+  assert (slist_data (rover) == &variable3);
+  rover = slist_next (rover);
+  assert (slist_data (rover) == &variable4);
+  rover = slist_next (rover);
+  assert (rover == NULL);
 
-void test_slist_nth_entry(void)
-{
-	SListEntry *list;
-	SListEntry *entry;
+  slist_free (list);
+  }
 
-	list = generate_list();
+void test_slist_nth_entry (void) {
+  SListEntry* list;
+  SListEntry* entry;
 
-	/* Check all values in the list */
+  list = generate_list();
 
-	entry = slist_nth_entry(list, 0);
-	assert(slist_data(entry) == &variable1);
-	entry = slist_nth_entry(list, 1);
-	assert(slist_data(entry) == &variable2);
-	entry = slist_nth_entry(list, 2);
-	assert(slist_data(entry) == &variable3);
-	entry = slist_nth_entry(list, 3);
-	assert(slist_data(entry) == &variable4);
+  /* Check all values in the list */
 
-	/* Check out of range values */
+  entry = slist_nth_entry (list, 0);
+  assert (slist_data (entry) == &variable1);
+  entry = slist_nth_entry (list, 1);
+  assert (slist_data (entry) == &variable2);
+  entry = slist_nth_entry (list, 2);
+  assert (slist_data (entry) == &variable3);
+  entry = slist_nth_entry (list, 3);
+  assert (slist_data (entry) == &variable4);
 
-	entry = slist_nth_entry(list, 4);
-	assert(entry == NULL);
-	entry = slist_nth_entry(list, 400);
-	assert(entry == NULL);
+  /* Check out of range values */
 
-	slist_free(list);
-}
+  entry = slist_nth_entry (list, 4);
+  assert (entry == NULL);
+  entry = slist_nth_entry (list, 400);
+  assert (entry == NULL);
 
-void test_slist_nth_data(void)
-{
-	SListEntry *list;
+  slist_free (list);
+  }
 
-	list = generate_list();
+void test_slist_nth_data (void) {
+  SListEntry* list;
 
-	/* Check all values in the list */
+  list = generate_list();
 
-	assert(slist_nth_data(list, 0) == &variable1);
-	assert(slist_nth_data(list, 1) == &variable2);
-	assert(slist_nth_data(list, 2) == &variable3);
-	assert(slist_nth_data(list, 3) == &variable4);
+  /* Check all values in the list */
 
-	/* Check out of range values */
+  assert (slist_nth_data (list, 0) == &variable1);
+  assert (slist_nth_data (list, 1) == &variable2);
+  assert (slist_nth_data (list, 2) == &variable3);
+  assert (slist_nth_data (list, 3) == &variable4);
 
-	assert(slist_nth_data(list, 4) == NULL);
-	assert(slist_nth_data(list, 400) == NULL);
+  /* Check out of range values */
 
-	slist_free(list);
-}
+  assert (slist_nth_data (list, 4) == NULL);
+  assert (slist_nth_data (list, 400) == NULL);
 
-void test_slist_length(void)
-{
-	SListEntry *list;
+  slist_free (list);
+  }
 
-	/* Generate a list and check that it is four entries long */
+void test_slist_length (void) {
+  SListEntry* list;
 
-	list = generate_list();
+  /* Generate a list and check that it is four entries long */
 
-	assert(slist_length(list) == 4);
+  list = generate_list();
 
-	/* Add an entry and check that it still works properly */
+  assert (slist_length (list) == 4);
 
-	slist_prepend(&list, &variable1);
+  /* Add an entry and check that it still works properly */
 
-	assert(slist_length(list) == 5);
+  slist_prepend (&list, &variable1);
 
-	/* Check the length of the empty list */
+  assert (slist_length (list) == 5);
 
-	assert(slist_length(NULL) == 0);
+  /* Check the length of the empty list */
 
-	slist_free(list);
-}
+  assert (slist_length (NULL) == 0);
 
-void test_slist_remove_entry(void)
-{
-	SListEntry *empty_list = NULL;
-	SListEntry *list;
-	SListEntry *entry;
+  slist_free (list);
+  }
 
-	list = generate_list();
+void test_slist_remove_entry (void) {
+  SListEntry* empty_list = NULL;
+  SListEntry* list;
+  SListEntry* entry;
 
-	/* Remove the third entry */
+  list = generate_list();
 
-	entry = slist_nth_entry(list, 2);
-	assert(slist_remove_entry(&list, entry) != 0);
-	assert(slist_length(list) == 3);
+  /* Remove the third entry */
 
-	/* Remove the first entry */
+  entry = slist_nth_entry (list, 2);
+  assert (slist_remove_entry (&list, entry) != 0);
+  assert (slist_length (list) == 3);
 
-	entry = slist_nth_entry(list, 0);
-	assert(slist_remove_entry(&list, entry) != 0);
-	assert(slist_length(list) == 2);
-	
-	/* Try some invalid removes */
+  /* Remove the first entry */
 
-	/* This was already removed: */
+  entry = slist_nth_entry (list, 0);
+  assert (slist_remove_entry (&list, entry) != 0);
+  assert (slist_length (list) == 2);
 
-	assert(slist_remove_entry(&list, entry) == 0);
+  /* Try some invalid removes */
 
-	/* NULL */
+  /* This was already removed: */
 
-	assert(slist_remove_entry(&list, NULL) == 0);
+  assert (slist_remove_entry (&list, entry) == 0);
 
-	/* Removing NULL from an empty list */
+  /* NULL */
 
-	assert(slist_remove_entry(&empty_list, NULL) == 0);
+  assert (slist_remove_entry (&list, NULL) == 0);
 
-	slist_free(list);
-}
+  /* Removing NULL from an empty list */
 
-void test_slist_remove_data(void)
-{
-	int entries[] = { 89, 4, 23, 42, 4, 16, 15, 4, 8, 99, 50, 30, 4 };
-	unsigned int num_entries = sizeof(entries) / sizeof(int);
-	int val;
-	SListEntry *list;
-	unsigned int i;
+  assert (slist_remove_entry (&empty_list, NULL) == 0);
 
-	/* Generate a list containing all the entries in the array */
+  slist_free (list);
+  }
 
-	list = NULL;
+void test_slist_remove_data (void) {
+  int entries[] = { 89, 4, 23, 42, 4, 16, 15, 4, 8, 99, 50, 30, 4 };
+  unsigned int num_entries = sizeof (entries) / sizeof (int);
+  int val;
+  SListEntry* list;
+  unsigned int i;
 
-	for (i=0; i<num_entries; ++i) {
-		slist_prepend(&list, &entries[i]);
-	}
+  /* Generate a list containing all the entries in the array */
 
-	/* Test removing invalid data */
+  list = NULL;
 
-	val = 0;
-	assert(slist_remove_data(&list, int_equal, &val) == 0);
-	val = 56;
-	assert(slist_remove_data(&list, int_equal, &val) == 0);
-	
-	/* Remove the number 8 from the list */
+  for (i = 0; i < num_entries; ++i) {
+    slist_prepend (&list, &entries[i]);
+    }
 
-	val = 8;
-	assert(slist_remove_data(&list, int_equal, &val) == 1);
-	assert(slist_length(list) == num_entries - 1);
+  /* Test removing invalid data */
 
-	/* Remove the number 4 from the list (occurs multiple times) */
+  val = 0;
+  assert (slist_remove_data (&list, int_equal, &val) == 0);
+  val = 56;
+  assert (slist_remove_data (&list, int_equal, &val) == 0);
 
-	val = 4;
-	assert(slist_remove_data(&list, int_equal, &val) == 4);
-	assert(slist_length(list) == num_entries - 5);
+  /* Remove the number 8 from the list */
 
-	/* Remove the number 89 from the list (first entry) */
+  val = 8;
+  assert (slist_remove_data (&list, int_equal, &val) == 1);
+  assert (slist_length (list) == num_entries - 1);
 
-	val = 89;
-	assert(slist_remove_data(&list, int_equal, &val) == 1);
-	assert(slist_length(list) == num_entries - 6);
+  /* Remove the number 4 from the list (occurs multiple times) */
 
-	slist_free(list);
-}
+  val = 4;
+  assert (slist_remove_data (&list, int_equal, &val) == 4);
+  assert (slist_length (list) == num_entries - 5);
 
-void test_slist_sort(void)
-{
-	SListEntry *list;
-	int entries[] = { 89, 4, 23, 42, 4, 16, 15, 4, 8, 99, 50, 30, 4 };
-	int sorted[]  = { 4, 4, 4, 4, 8, 15, 16, 23, 30, 42, 50, 89, 99 };
-	unsigned int num_entries = sizeof(entries) / sizeof(int);
-	unsigned int i;
+  /* Remove the number 89 from the list (first entry) */
 
-	list = NULL;
+  val = 89;
+  assert (slist_remove_data (&list, int_equal, &val) == 1);
+  assert (slist_length (list) == num_entries - 6);
 
-	for (i=0; i<num_entries; ++i) {
-		slist_prepend(&list, &entries[i]);
-	}
+  slist_free (list);
+  }
 
-	slist_sort(&list, int_compare);
+void test_slist_sort (void) {
+  SListEntry* list;
+  int entries[] = { 89, 4, 23, 42, 4, 16, 15, 4, 8, 99, 50, 30, 4 };
+  int sorted[]  = { 4, 4, 4, 4, 8, 15, 16, 23, 30, 42, 50, 89, 99 };
+  unsigned int num_entries = sizeof (entries) / sizeof (int);
+  unsigned int i;
 
-	/* List length is unchanged */
+  list = NULL;
 
-	assert(slist_length(list) == num_entries);
+  for (i = 0; i < num_entries; ++i) {
+    slist_prepend (&list, &entries[i]);
+    }
 
-	/* Check the list is sorted */
+  slist_sort (&list, int_compare);
 
-	for (i=0; i<num_entries; ++i) {
-		int *value;
+  /* List length is unchanged */
 
-		value = (int *) slist_nth_data(list, i);
-		assert(*value == sorted[i]);
-	}
+  assert (slist_length (list) == num_entries);
 
-	slist_free(list);
+  /* Check the list is sorted */
 
-	/* Check sorting an empty list */
+  for (i = 0; i < num_entries; ++i) {
+    int* value;
 
-	list = NULL;
+    value = (int*) slist_nth_data (list, i);
+    assert (*value == sorted[i]);
+    }
 
-	slist_sort(&list, int_compare);
+  slist_free (list);
 
-	assert(list == NULL);
-}
+  /* Check sorting an empty list */
 
-void test_slist_find_data(void)
-{
-	int entries[] = { 89, 23, 42, 16, 15, 4, 8, 99, 50, 30 };
-	int num_entries = sizeof(entries) / sizeof(int);
-	SListEntry *list;
-	SListEntry *result;
-	int i;
-	int val;
-	int *data;
+  list = NULL;
 
-	/* Generate a list containing the entries */
+  slist_sort (&list, int_compare);
 
-	list = NULL;
-	for (i=0; i<num_entries; ++i) {
-		slist_append(&list, &entries[i]);
-	}
+  assert (list == NULL);
+  }
 
-	/* Check that each value can be searched for correctly */
+void test_slist_find_data (void) {
+  int entries[] = { 89, 23, 42, 16, 15, 4, 8, 99, 50, 30 };
+  int num_entries = sizeof (entries) / sizeof (int);
+  SListEntry* list;
+  SListEntry* result;
+  int i;
+  int val;
+  int* data;
 
-	for (i=0; i<num_entries; ++i) {
+  /* Generate a list containing the entries */
 
-		val = entries[i];
-		
-		result = slist_find_data(list, int_equal, &val);
-		
-		assert(result != NULL);
+  list = NULL;
 
-		data = (int *) slist_data(result);
-		assert(*data == val);
-	}
-	
-	/* Check some invalid values return NULL */
+  for (i = 0; i < num_entries; ++i) {
+    slist_append (&list, &entries[i]);
+    }
 
-	val = 0;
-	assert(slist_find_data(list, int_equal, &val) == NULL);
-	val = 56;
-	assert(slist_find_data(list, int_equal, &val) == NULL);
+  /* Check that each value can be searched for correctly */
 
-	slist_free(list);
-}
+  for (i = 0; i < num_entries; ++i) {
 
-void test_slist_to_array(void)
-{
-	SListEntry *list;
-	void **array;
-	   
-	list = generate_list();
+    val = entries[i];
 
-	array = slist_to_array(list);
+    result = slist_find_data (list, int_equal, &val);
 
-	assert(array[0] == &variable1);
-	assert(array[1] == &variable2);
-	assert(array[2] == &variable3);
-	assert(array[3] == &variable4);
+    assert (result != NULL);
 
-	free(array);
+    data = (int*) slist_data (result);
+    assert (*data == val);
+    }
 
-	/* Test out of memory scenario */
+  /* Check some invalid values return NULL */
 
-	alloc_test_set_limit(0);
+  val = 0;
+  assert (slist_find_data (list, int_equal, &val) == NULL);
+  val = 56;
+  assert (slist_find_data (list, int_equal, &val) == NULL);
 
-	array = slist_to_array(list);
-	assert(array == NULL);
+  slist_free (list);
+  }
 
-	slist_free(list);
-}
+void test_slist_to_array (void) {
+  SListEntry* list;
+  void** array;
 
-void test_slist_iterate(void)
-{
-	SListEntry *list;
-	SListIterator iter;
-	int *data;
-	int a;
-	int i;
-	int counter;
+  list = generate_list();
 
-	/* Create a list with 50 entries */
+  array = slist_to_array (list);
 
-	list = NULL;
+  assert (array[0] == &variable1);
+  assert (array[1] == &variable2);
+  assert (array[2] == &variable3);
+  assert (array[3] == &variable4);
 
-	for (i=0; i<50; ++i) {
-		slist_prepend(&list, &a);
-	}
+  free (array);
 
-	/* Iterate over the list and count the number of entries visited */
+  /* Test out of memory scenario */
 
-	counter = 0;
+  alloc_test_set_limit (0);
 
-	slist_iterate(&list, &iter);
+  array = slist_to_array (list);
+  assert (array == NULL);
 
-	/* Test remove before slist_iter_next has been called */
+  slist_free (list);
+  }
 
-	slist_iter_remove(&iter);
+void test_slist_iterate (void) {
+  SListEntry* list;
+  SListIterator iter;
+  int* data;
+  int a;
+  int i;
+  int counter;
 
-	/* Iterate over the list */
+  /* Create a list with 50 entries */
 
-	while (slist_iter_has_more(&iter)) {
+  list = NULL;
 
-		data = (int *) slist_iter_next(&iter);
+  for (i = 0; i < 50; ++i) {
+    slist_prepend (&list, &a);
+    }
 
-		++counter;
+  /* Iterate over the list and count the number of entries visited */
 
-		/* Remove half the entries from the list */
+  counter = 0;
 
-		if ((counter % 2) == 0) {
-			slist_iter_remove(&iter);
+  slist_iterate (&list, &iter);
 
-			/* Test double remove */
+  /* Test remove before slist_iter_next has been called */
 
-			slist_iter_remove(&iter);
-		}
-	}
+  slist_iter_remove (&iter);
 
-	/* Test iter_next after iteration has completed. */
+  /* Iterate over the list */
 
-	assert(slist_iter_next(&iter) == SLIST_NULL);
-	
-	/* Test remove at the end of a list */
+  while (slist_iter_has_more (&iter)) {
 
-	slist_iter_remove(&iter);
+    data = (int*) slist_iter_next (&iter);
 
-	assert(counter == 50);
-	assert(slist_length(list) == 25);
+    ++counter;
 
-	slist_free(list);
+    /* Remove half the entries from the list */
 
-	/* Test iterating over an empty list */
+    if ( (counter % 2) == 0) {
+      slist_iter_remove (&iter);
 
-	list = NULL;
-	counter = 0;
+      /* Test double remove */
 
-	slist_iterate(&list, &iter);
+      slist_iter_remove (&iter);
+      }
+    }
 
-	while (slist_iter_has_more(&iter)) {
+  /* Test iter_next after iteration has completed. */
 
-		data = (int *) slist_iter_next(&iter);
+  assert (slist_iter_next (&iter) == SLIST_NULL);
 
-		++counter;
+  /* Test remove at the end of a list */
 
-		/* Remove half the entries from the list */
+  slist_iter_remove (&iter);
 
-		if ((counter % 2) == 0) {
-			slist_iter_remove(&iter);
-		}
-	}
+  assert (counter == 50);
+  assert (slist_length (list) == 25);
 
-	assert(counter == 0);
-}
+  slist_free (list);
+
+  /* Test iterating over an empty list */
+
+  list = NULL;
+  counter = 0;
+
+  slist_iterate (&list, &iter);
+
+  while (slist_iter_has_more (&iter)) {
+
+    data = (int*) slist_iter_next (&iter);
+
+    ++counter;
+
+    /* Remove half the entries from the list */
+
+    if ( (counter % 2) == 0) {
+      slist_iter_remove (&iter);
+      }
+    }
+
+  assert (counter == 0);
+  }
 
 /* Test that the iterator functions can survive removal of the current
  * value using the normal remove functions. */
 
-void test_slist_iterate_bad_remove(void)
-{
-	SListEntry *list;
-	SListIterator iter;
-	int values[49];
-	int i;
-	int *val;
+void test_slist_iterate_bad_remove (void) {
+  SListEntry* list;
+  SListIterator iter;
+  int values[49];
+  int i;
+  int* val;
 
-	/* Create a list with 49 entries */
+  /* Create a list with 49 entries */
 
-	list = NULL;
+  list = NULL;
 
-	for (i=0; i<49; ++i) {
-		values[i] = i;
-		slist_prepend(&list, &values[i]);
-	}
+  for (i = 0; i < 49; ++i) {
+    values[i] = i;
+    slist_prepend (&list, &values[i]);
+    }
 
-	/* Iterate over the list, removing each element in turn.  We
-	 * use an odd number of list elements so that the first and 
-	 * last entries are removed. */
+  /* Iterate over the list, removing each element in turn.  We
+   * use an odd number of list elements so that the first and
+   * last entries are removed. */
 
-	slist_iterate(&list, &iter);
+  slist_iterate (&list, &iter);
 
-	while (slist_iter_has_more(&iter)) {
-		val = slist_iter_next(&iter);
+  while (slist_iter_has_more (&iter)) {
+    val = slist_iter_next (&iter);
 
-		/* Remove all the even numbers. Check that slist_iter_remove
-		 * can cope with the fact that the current element has
-		 * already been removed. */
+    /* Remove all the even numbers. Check that slist_iter_remove
+     * can cope with the fact that the current element has
+     * already been removed. */
 
-		if ((*val % 2) == 0) {
-			assert(slist_remove_data(&list, int_equal, val) != 0);
-			slist_iter_remove(&iter);
-		}
-	}
+    if ( (*val % 2) == 0) {
+      assert (slist_remove_data (&list, int_equal, val) != 0);
+      slist_iter_remove (&iter);
+      }
+    }
 
-	slist_free(list);
-}
+  slist_free (list);
+  }
 
 static UnitTestFunction tests[] = {
-	test_slist_append,
-	test_slist_prepend,
-	test_slist_free,
-	test_slist_next,
-	test_slist_nth_entry,
-	test_slist_nth_data,
-	test_slist_length,
-	test_slist_remove_entry,
-	test_slist_remove_data,
-	test_slist_sort,
-	test_slist_find_data,
-	test_slist_to_array,
-	test_slist_iterate,
-	test_slist_iterate_bad_remove,
-	NULL
-};
+  test_slist_append,
+  test_slist_prepend,
+  test_slist_free,
+  test_slist_next,
+  test_slist_nth_entry,
+  test_slist_nth_data,
+  test_slist_length,
+  test_slist_remove_entry,
+  test_slist_remove_data,
+  test_slist_sort,
+  test_slist_find_data,
+  test_slist_to_array,
+  test_slist_iterate,
+  test_slist_iterate_bad_remove,
+  NULL
+  };
 
-int main(int argc, char *argv[])
-{
-	run_tests(tests);
+int main (int argc, char* argv[]) {
+  run_tests (tests);
 
-	return 0;
-}
+  return 0;
+  }
 

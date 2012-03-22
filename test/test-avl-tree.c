@@ -2,19 +2,19 @@
 
 Copyright (c) 2005-2008, Simon Howard
 
-Permission to use, copy, modify, and/or distribute this software 
-for any purpose with or without fee is hereby granted, provided 
-that the above copyright notice and this permission notice appear 
-in all copies. 
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted, provided
+that the above copyright notice and this permission notice appear
+in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE 
-AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN      
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
 
@@ -35,417 +35,408 @@ int test_array[NUM_TEST_VALUES];
 #if 0
 /* Tree print function - useful for debugging. */
 
-static void print_tree(AVLTreeNode *node, int depth)
-{
-	int *value;
-	int i;
+static void print_tree (AVLTreeNode* node, int depth) {
+  int* value;
+  int i;
 
-	if (node == NULL) {
-		return;
-	}
+  if (node == NULL) {
+    return;
+    }
 
-	print_tree(avl_tree_node_child(node, AVL_TREE_NODE_LEFT), depth + 1);
+  print_tree (avl_tree_node_child (node, AVL_TREE_NODE_LEFT), depth + 1);
 
-	for (i=0; i<depth*6; ++i) {
-		printf(" ");
-	}
+  for (i = 0; i < depth * 6; ++i) {
+    printf (" ");
+    }
 
-	value = avl_tree_node_key(node);
-	printf("%i\n", *value);
+  value = avl_tree_node_key (node);
+  printf ("%i\n", *value);
 
-	print_tree(avl_tree_node_child(node, AVL_TREE_NODE_RIGHT), depth + 1);
-}
+  print_tree (avl_tree_node_child (node, AVL_TREE_NODE_RIGHT), depth + 1);
+  }
 #endif
 
-int find_subtree_height(AVLTreeNode *node)
-{
-	AVLTreeNode *left_subtree;
-	AVLTreeNode *right_subtree;
-	int left_height, right_height;
+int find_subtree_height (AVLTreeNode* node) {
+  AVLTreeNode* left_subtree;
+  AVLTreeNode* right_subtree;
+  int left_height, right_height;
 
-	if (node == NULL) {
-		return 0;
-	}
+  if (node == NULL) {
+    return 0;
+    }
 
-	left_subtree = avl_tree_node_child(node, AVL_TREE_NODE_LEFT);
-	right_subtree = avl_tree_node_child(node, AVL_TREE_NODE_RIGHT);
-	left_height = find_subtree_height(left_subtree);
-	right_height = find_subtree_height(right_subtree);
+  left_subtree = avl_tree_node_child (node, AVL_TREE_NODE_LEFT);
+  right_subtree = avl_tree_node_child (node, AVL_TREE_NODE_RIGHT);
+  left_height = find_subtree_height (left_subtree);
+  right_height = find_subtree_height (right_subtree);
 
-	if (left_height > right_height) {
-		return left_height + 1;
-	} else {
-		return right_height + 1;
-	}
-}
+  if (left_height > right_height) {
+    return left_height + 1;
+    }
+
+  else {
+    return right_height + 1;
+    }
+  }
 
 /* Validates a subtree, returning its height */
 
 int counter;
 
-int validate_subtree(AVLTreeNode *node)
-{
-	AVLTreeNode *left_node, *right_node;
-	int left_height, right_height;
-	int *key;
+int validate_subtree (AVLTreeNode* node) {
+  AVLTreeNode* left_node, *right_node;
+  int left_height, right_height;
+  int* key;
 
-	if (node == NULL) {
-		return 0;
-	}
+  if (node == NULL) {
+    return 0;
+    }
 
-	left_node = avl_tree_node_child(node, AVL_TREE_NODE_LEFT);
-	right_node = avl_tree_node_child(node, AVL_TREE_NODE_RIGHT);
+  left_node = avl_tree_node_child (node, AVL_TREE_NODE_LEFT);
+  right_node = avl_tree_node_child (node, AVL_TREE_NODE_RIGHT);
 
-	/* Check the parent references of the children */
+  /* Check the parent references of the children */
 
-	if (left_node != NULL) {
-		assert(avl_tree_node_parent(left_node) == node);
-	}
-	if (right_node != NULL) {
-		assert(avl_tree_node_parent(right_node) == node);
-	}
+  if (left_node != NULL) {
+    assert (avl_tree_node_parent (left_node) == node);
+    }
 
-	/* Recursively validate the left and right subtrees,
-	 * obtaining the height at the same time. */
+  if (right_node != NULL) {
+    assert (avl_tree_node_parent (right_node) == node);
+    }
 
-	left_height = validate_subtree(left_node);
+  /* Recursively validate the left and right subtrees,
+   * obtaining the height at the same time. */
 
-	/* Check that the keys are in the correct order */
+  left_height = validate_subtree (left_node);
 
-	key = (int *) avl_tree_node_key(node);
+  /* Check that the keys are in the correct order */
 
-	assert(*key > counter);
-	counter = *key;
-	
-	right_height = validate_subtree(right_node);
+  key = (int*) avl_tree_node_key (node);
 
-	/* Check that the returned height value matches the 
-	 * result of avl_tree_subtree_height(). */
+  assert (*key > counter);
+  counter = *key;
 
-	assert(avl_tree_subtree_height(left_node) == left_height);
-	assert(avl_tree_subtree_height(right_node) == right_height);
+  right_height = validate_subtree (right_node);
 
-	/* Check this node is balanced */
+  /* Check that the returned height value matches the
+   * result of avl_tree_subtree_height(). */
 
-	assert(left_height - right_height < 2 && right_height - left_height < 2);
+  assert (avl_tree_subtree_height (left_node) == left_height);
+  assert (avl_tree_subtree_height (right_node) == right_height);
 
-	/* Calculate the height of this node */
+  /* Check this node is balanced */
 
-	if (left_height > right_height) {
-		return left_height + 1;
-	} else {
-		return right_height + 1;
-	}
-}
+  assert (left_height - right_height < 2 && right_height - left_height < 2);
 
-void validate_tree(AVLTree *tree)
-{
-	AVLTreeNode *root_node;
-	int height;
+  /* Calculate the height of this node */
 
-	root_node = avl_tree_root_node(tree);
+  if (left_height > right_height) {
+    return left_height + 1;
+    }
 
-	if (root_node != NULL) {
-		height = find_subtree_height(root_node);
-		assert(avl_tree_subtree_height(root_node) == height);
-	}
+  else {
+    return right_height + 1;
+    }
+  }
 
-	counter = -1;
-	validate_subtree(root_node);
-}
+void validate_tree (AVLTree* tree) {
+  AVLTreeNode* root_node;
+  int height;
 
-AVLTree *create_tree(void)
-{
-	AVLTree *tree;
-	int i;
+  root_node = avl_tree_root_node (tree);
 
-	/* Create a tree and fill with nodes */
+  if (root_node != NULL) {
+    height = find_subtree_height (root_node);
+    assert (avl_tree_subtree_height (root_node) == height);
+    }
 
-	tree = avl_tree_new((AVLTreeCompareFunc) int_compare);
+  counter = -1;
+  validate_subtree (root_node);
+  }
 
-	for (i=0; i<NUM_TEST_VALUES; ++i) {
-		test_array[i] = i;
-		avl_tree_insert(tree, &test_array[i], &test_array[i]);
-	}
-	
-	return tree;
-}
+AVLTree* create_tree (void) {
+  AVLTree* tree;
+  int i;
 
-void test_avl_tree_new(void)
-{
-	AVLTree *tree;
+  /* Create a tree and fill with nodes */
 
-	tree = avl_tree_new((AVLTreeCompareFunc) int_compare);
+  tree = avl_tree_new ( (AVLTreeCompareFunc) int_compare);
 
-	assert(tree != NULL);
-	assert(avl_tree_root_node(tree) == NULL);
-	assert(avl_tree_num_entries(tree) == 0);
+  for (i = 0; i < NUM_TEST_VALUES; ++i) {
+    test_array[i] = i;
+    avl_tree_insert (tree, &test_array[i], &test_array[i]);
+    }
 
-	avl_tree_free(tree);
+  return tree;
+  }
 
-	/* Test out of memory scenario */
+void test_avl_tree_new (void) {
+  AVLTree* tree;
 
-	alloc_test_set_limit(0);
+  tree = avl_tree_new ( (AVLTreeCompareFunc) int_compare);
 
-	tree = avl_tree_new((AVLTreeCompareFunc) int_compare);
+  assert (tree != NULL);
+  assert (avl_tree_root_node (tree) == NULL);
+  assert (avl_tree_num_entries (tree) == 0);
 
-	assert(tree == NULL);
+  avl_tree_free (tree);
 
-}
+  /* Test out of memory scenario */
 
-void test_avl_tree_insert_lookup(void)
-{
-	AVLTree *tree;
-	AVLTreeNode *node;
-	unsigned int i;
-	int *value;
+  alloc_test_set_limit (0);
 
-	/* Create a tree containing some values. Validate the 
-	 * tree is consistent at all stages. */
+  tree = avl_tree_new ( (AVLTreeCompareFunc) int_compare);
 
-	tree = avl_tree_new((AVLTreeCompareFunc) int_compare);
+  assert (tree == NULL);
 
-	for (i=0; i<NUM_TEST_VALUES; ++i) {
-		test_array[i] = (int) i;
-		avl_tree_insert(tree, &test_array[i], &test_array[i]);
+  }
 
-		assert(avl_tree_num_entries(tree) == i + 1);
-		validate_tree(tree);
-	}
+void test_avl_tree_insert_lookup (void) {
+  AVLTree* tree;
+  AVLTreeNode* node;
+  unsigned int i;
+  int* value;
 
-	assert(avl_tree_root_node(tree) != NULL);
+  /* Create a tree containing some values. Validate the
+   * tree is consistent at all stages. */
 
-	/* Check that all values can be read back again */
+  tree = avl_tree_new ( (AVLTreeCompareFunc) int_compare);
 
-	for (i=0; i<NUM_TEST_VALUES; ++i) {
-		node = avl_tree_lookup_node(tree, &i);
-		assert(node != NULL);
-		value = avl_tree_node_key(node);
-		assert(*value == (int) i);
-		value = avl_tree_node_value(node);
-		assert(*value == (int) i);
-	}
+  for (i = 0; i < NUM_TEST_VALUES; ++i) {
+    test_array[i] = (int) i;
+    avl_tree_insert (tree, &test_array[i], &test_array[i]);
 
-	/* Check that invalid nodes are not found */
+    assert (avl_tree_num_entries (tree) == i + 1);
+    validate_tree (tree);
+    }
 
-	i = NUM_TEST_VALUES + 100;
-	assert(avl_tree_lookup_node(tree, &i) == NULL);
+  assert (avl_tree_root_node (tree) != NULL);
 
-	avl_tree_free(tree);
-}
+  /* Check that all values can be read back again */
 
-void test_avl_tree_child(void)
-{
-	AVLTree *tree;
-	AVLTreeNode *root;
-	AVLTreeNode *left;
-	AVLTreeNode *right;
-	int values[] = { 1, 2, 3 };
-	int *p;
-	int i;
+  for (i = 0; i < NUM_TEST_VALUES; ++i) {
+    node = avl_tree_lookup_node (tree, &i);
+    assert (node != NULL);
+    value = avl_tree_node_key (node);
+    assert (*value == (int) i);
+    value = avl_tree_node_value (node);
+    assert (*value == (int) i);
+    }
 
-	/* Create a tree containing some values. Validate the 
-	 * tree is consistent at all stages. */
+  /* Check that invalid nodes are not found */
 
-	tree = avl_tree_new((AVLTreeCompareFunc) int_compare);
+  i = NUM_TEST_VALUES + 100;
+  assert (avl_tree_lookup_node (tree, &i) == NULL);
 
-	for (i=0; i<3; ++i) {
-		avl_tree_insert(tree, &values[i], &values[i]);
-	}
+  avl_tree_free (tree);
+  }
 
-	/* Check the tree */
+void test_avl_tree_child (void) {
+  AVLTree* tree;
+  AVLTreeNode* root;
+  AVLTreeNode* left;
+  AVLTreeNode* right;
+  int values[] = { 1, 2, 3 };
+  int* p;
+  int i;
 
-	root = avl_tree_root_node(tree);
-	p = avl_tree_node_value(root);
-	assert(*p == 2);
+  /* Create a tree containing some values. Validate the
+   * tree is consistent at all stages. */
 
-	left = avl_tree_node_child(root, AVL_TREE_NODE_LEFT);
-	p = avl_tree_node_value(left);
-	assert(*p == 1);
+  tree = avl_tree_new ( (AVLTreeCompareFunc) int_compare);
 
-	right = avl_tree_node_child(root, AVL_TREE_NODE_RIGHT);
-	p = avl_tree_node_value(right);
-	assert(*p == 3);
+  for (i = 0; i < 3; ++i) {
+    avl_tree_insert (tree, &values[i], &values[i]);
+    }
 
-	/* Check invalid values */
+  /* Check the tree */
 
-	assert(avl_tree_node_child(root, -1) == NULL);
-	assert(avl_tree_node_child(root, 10000) == NULL);
-	assert(avl_tree_node_child(root, 2) == NULL);
-	assert(avl_tree_node_child(root, -100000) == NULL);
+  root = avl_tree_root_node (tree);
+  p = avl_tree_node_value (root);
+  assert (*p == 2);
 
-	avl_tree_free(tree);
-}
+  left = avl_tree_node_child (root, AVL_TREE_NODE_LEFT);
+  p = avl_tree_node_value (left);
+  assert (*p == 1);
 
-void test_out_of_memory(void)
-{
-	AVLTree *tree;
-	AVLTreeNode *node;
-	int i;
+  right = avl_tree_node_child (root, AVL_TREE_NODE_RIGHT);
+  p = avl_tree_node_value (right);
+  assert (*p == 3);
 
-	/* Create a tree */
+  /* Check invalid values */
 
-	tree = create_tree();
+  assert (avl_tree_node_child (root, -1) == NULL);
+  assert (avl_tree_node_child (root, 10000) == NULL);
+  assert (avl_tree_node_child (root, 2) == NULL);
+  assert (avl_tree_node_child (root, -100000) == NULL);
 
-	/* Set a limit to stop any more entries from being added. */
+  avl_tree_free (tree);
+  }
 
-	alloc_test_set_limit(0);
+void test_out_of_memory (void) {
+  AVLTree* tree;
+  AVLTreeNode* node;
+  int i;
 
-	/* Try to add some more nodes and verify that this fails. */
+  /* Create a tree */
 
-	for (i=10000; i<20000; ++i) {
-		node = avl_tree_insert(tree, &i, &i);
-		assert(node == NULL);
-		validate_tree(tree);
-	}
+  tree = create_tree();
 
-	avl_tree_free(tree);
-}
+  /* Set a limit to stop any more entries from being added. */
 
-void test_avl_tree_free(void)
-{
-	AVLTree *tree;
-	
-	/* Try freeing an empty tree */
+  alloc_test_set_limit (0);
 
-	tree = avl_tree_new((AVLTreeCompareFunc) int_compare);
-	avl_tree_free(tree);
+  /* Try to add some more nodes and verify that this fails. */
 
-	/* Create a big tree and free it */
+  for (i = 10000; i < 20000; ++i) {
+    node = avl_tree_insert (tree, &i, &i);
+    assert (node == NULL);
+    validate_tree (tree);
+    }
 
-	tree = create_tree();
-	avl_tree_free(tree);
-}
+  avl_tree_free (tree);
+  }
 
-void test_avl_tree_lookup(void)
-{
-	AVLTree *tree;
-	int i;
-	int *value;
+void test_avl_tree_free (void) {
+  AVLTree* tree;
 
-	/* Create a tree and look up all values */
+  /* Try freeing an empty tree */
 
-	tree = create_tree();
+  tree = avl_tree_new ( (AVLTreeCompareFunc) int_compare);
+  avl_tree_free (tree);
 
-	for (i=0; i<NUM_TEST_VALUES; ++i) {
-		value = avl_tree_lookup(tree, &i);
+  /* Create a big tree and free it */
 
-		assert(value != NULL);
-		assert(*value == i);
-	}
+  tree = create_tree();
+  avl_tree_free (tree);
+  }
 
-	/* Test invalid values */
+void test_avl_tree_lookup (void) {
+  AVLTree* tree;
+  int i;
+  int* value;
 
-	i = -1;
-	assert(avl_tree_lookup(tree, &i) == NULL);
-	i = NUM_TEST_VALUES + 1;
-	assert(avl_tree_lookup(tree, &i) == NULL);
-	i = 8724897;
-	assert(avl_tree_lookup(tree, &i) == NULL);
+  /* Create a tree and look up all values */
 
-	avl_tree_free(tree);
-}
+  tree = create_tree();
 
-void test_avl_tree_remove(void)
-{
-	AVLTree *tree;
-	int i;
-	int x, y, z;
-	int value;
-	unsigned int expected_entries;
+  for (i = 0; i < NUM_TEST_VALUES; ++i) {
+    value = avl_tree_lookup (tree, &i);
 
-	tree = create_tree();
+    assert (value != NULL);
+    assert (*value == i);
+    }
 
-	/* Try removing invalid entries */
+  /* Test invalid values */
 
-	i = NUM_TEST_VALUES + 100;
-	assert(avl_tree_remove(tree, &i) == 0);
-	i = -1;
-	assert(avl_tree_remove(tree, &i) == 0);
+  i = -1;
+  assert (avl_tree_lookup (tree, &i) == NULL);
+  i = NUM_TEST_VALUES + 1;
+  assert (avl_tree_lookup (tree, &i) == NULL);
+  i = 8724897;
+  assert (avl_tree_lookup (tree, &i) == NULL);
 
-	/* Delete the nodes from the tree */
+  avl_tree_free (tree);
+  }
 
-	expected_entries = NUM_TEST_VALUES;
+void test_avl_tree_remove (void) {
+  AVLTree* tree;
+  int i;
+  int x, y, z;
+  int value;
+  unsigned int expected_entries;
 
-	/* This looping arrangement causes nodes to be removed in a 
-	 * randomish fashion from all over the tree. */
+  tree = create_tree();
 
-	for (x=0; x<10; ++x) {
-		for (y=0; y<10; ++y) {
-			for (z=0; z<10; ++z) {
-				value = z * 100 + (9 - y) * 10 + x;
-				assert(avl_tree_remove(tree, &value) != 0);
-				validate_tree(tree);
-				expected_entries -= 1;
-				assert(avl_tree_num_entries(tree)
-				       == expected_entries);
-			}
-		}
-	}
+  /* Try removing invalid entries */
 
-	/* All entries removed, should be empty now */
+  i = NUM_TEST_VALUES + 100;
+  assert (avl_tree_remove (tree, &i) == 0);
+  i = -1;
+  assert (avl_tree_remove (tree, &i) == 0);
 
-	assert(avl_tree_root_node(tree) == NULL);
+  /* Delete the nodes from the tree */
 
-	avl_tree_free(tree);
-}
+  expected_entries = NUM_TEST_VALUES;
 
-void test_avl_tree_to_array(void)
-{
-	AVLTree *tree;
-	int entries[] = { 89, 23, 42, 4, 16, 15, 8, 99, 50, 30 };
-	int sorted[]  = { 4, 8, 15, 16, 23, 30, 42, 50, 89, 99 };
-	unsigned int num_entries = sizeof(entries) / sizeof(int);
-	unsigned int i;
-	int **array;
+  /* This looping arrangement causes nodes to be removed in a
+   * randomish fashion from all over the tree. */
 
-	/* Add all entries to the tree */
-	
-	tree = avl_tree_new((AVLTreeCompareFunc) int_compare);
+  for (x = 0; x < 10; ++x) {
+    for (y = 0; y < 10; ++y) {
+      for (z = 0; z < 10; ++z) {
+        value = z * 100 + (9 - y) * 10 + x;
+        assert (avl_tree_remove (tree, &value) != 0);
+        validate_tree (tree);
+        expected_entries -= 1;
+        assert (avl_tree_num_entries (tree)
+                == expected_entries);
+        }
+      }
+    }
 
-	for (i=0; i<num_entries; ++i) {
-		avl_tree_insert(tree, &entries[i], NULL);
-	}
-	
-	assert(avl_tree_num_entries(tree) == num_entries);
+  /* All entries removed, should be empty now */
 
-	/* Convert to an array and check the contents */
+  assert (avl_tree_root_node (tree) == NULL);
 
-	array = (int **) avl_tree_to_array(tree);
+  avl_tree_free (tree);
+  }
 
-	for (i=0; i<num_entries; ++i) {
-		assert(*array[i] == sorted[i]);
-	}
+void test_avl_tree_to_array (void) {
+  AVLTree* tree;
+  int entries[] = { 89, 23, 42, 4, 16, 15, 8, 99, 50, 30 };
+  int sorted[]  = { 4, 8, 15, 16, 23, 30, 42, 50, 89, 99 };
+  unsigned int num_entries = sizeof (entries) / sizeof (int);
+  unsigned int i;
+  int** array;
 
-	free(array);
+  /* Add all entries to the tree */
 
-	/* Test out of memory scenario */
+  tree = avl_tree_new ( (AVLTreeCompareFunc) int_compare);
 
-	alloc_test_set_limit(0);
+  for (i = 0; i < num_entries; ++i) {
+    avl_tree_insert (tree, &entries[i], NULL);
+    }
 
-	array = (int **) avl_tree_to_array(tree);
-	assert(array == NULL);
-	validate_tree(tree);
+  assert (avl_tree_num_entries (tree) == num_entries);
 
-	avl_tree_free(tree);
-}
+  /* Convert to an array and check the contents */
+
+  array = (int**) avl_tree_to_array (tree);
+
+  for (i = 0; i < num_entries; ++i) {
+    assert (*array[i] == sorted[i]);
+    }
+
+  free (array);
+
+  /* Test out of memory scenario */
+
+  alloc_test_set_limit (0);
+
+  array = (int**) avl_tree_to_array (tree);
+  assert (array == NULL);
+  validate_tree (tree);
+
+  avl_tree_free (tree);
+  }
 
 static UnitTestFunction tests[] = {
-	test_avl_tree_new,
-	test_avl_tree_free,
-	test_avl_tree_child,
-	test_avl_tree_insert_lookup,
-	test_avl_tree_lookup,
-	test_avl_tree_remove,
-	test_avl_tree_to_array,
-	test_out_of_memory,
-	NULL
-};
-	
-int main(int argc, char *argv[])
-{
-	run_tests(tests);
-	return 0;
-}
+  test_avl_tree_new,
+  test_avl_tree_free,
+  test_avl_tree_child,
+  test_avl_tree_insert_lookup,
+  test_avl_tree_lookup,
+  test_avl_tree_remove,
+  test_avl_tree_to_array,
+  test_out_of_memory,
+  NULL
+  };
+
+int main (int argc, char* argv[]) {
+  run_tests (tests);
+  return 0;
+  }
 
 

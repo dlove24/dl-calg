@@ -2,19 +2,19 @@
 
 Copyright (c) 2005-2008, Simon Howard
 
-Permission to use, copy, modify, and/or distribute this software 
-for any purpose with or without fee is hereby granted, provided 
-that the above copyright notice and this permission notice appear 
-in all copies. 
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted, provided
+that the above copyright notice and this permission notice appear
+in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE 
-AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN      
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
 
@@ -29,308 +29,298 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 int variable1, variable2, variable3, variable4;
 
-Queue *generate_queue(void)
-{
-	Queue *queue;
-	int i;
+Queue* generate_queue (void) {
+  Queue* queue;
+  int i;
 
-	queue = queue_new();
-	
-	/* Add some values */
+  queue = queue_new();
 
-	for (i=0; i<1000; ++i) {
-		queue_push_head(queue, &variable1);
-		queue_push_head(queue, &variable2);
-		queue_push_head(queue, &variable3);
-		queue_push_head(queue, &variable4);
-	}
+  /* Add some values */
 
-	return queue;
-}
+  for (i = 0; i < 1000; ++i) {
+    queue_push_head (queue, &variable1);
+    queue_push_head (queue, &variable2);
+    queue_push_head (queue, &variable3);
+    queue_push_head (queue, &variable4);
+    }
+
+  return queue;
+  }
 
 /* Test cases for the queue */
 
-void test_queue_new_free(void)
-{
-	int i;
-	Queue *queue;
+void test_queue_new_free (void) {
+  int i;
+  Queue* queue;
 
-	/* Create and destroy a queue */
-	
-	queue = queue_new();
+  /* Create and destroy a queue */
 
-	queue_free(queue);
+  queue = queue_new();
 
-	/* Add lots of values and then destroy */
+  queue_free (queue);
 
-	queue = queue_new();
+  /* Add lots of values and then destroy */
 
-	for (i=0; i<1000; ++i) {
-		queue_push_head(queue, &variable1);
-	}
+  queue = queue_new();
 
-	queue_free(queue);
+  for (i = 0; i < 1000; ++i) {
+    queue_push_head (queue, &variable1);
+    }
 
-	/* Test allocation when there is no free memory */
+  queue_free (queue);
 
-	alloc_test_set_limit(0);
-	queue = queue_new();
-	assert(queue == NULL);
-}
+  /* Test allocation when there is no free memory */
 
-void test_queue_push_head(void)
-{
-	Queue *queue;
-	int i;
+  alloc_test_set_limit (0);
+  queue = queue_new();
+  assert (queue == NULL);
+  }
 
-	queue = queue_new();
-	
-	/* Add some values */
+void test_queue_push_head (void) {
+  Queue* queue;
+  int i;
 
-	for (i=0; i<1000; ++i) {
-		queue_push_head(queue, &variable1);
-		queue_push_head(queue, &variable2);
-		queue_push_head(queue, &variable3);
-		queue_push_head(queue, &variable4);
-	}
+  queue = queue_new();
 
-	assert(!queue_is_empty(queue));
+  /* Add some values */
 
-	/* Check values come out of the tail properly */
+  for (i = 0; i < 1000; ++i) {
+    queue_push_head (queue, &variable1);
+    queue_push_head (queue, &variable2);
+    queue_push_head (queue, &variable3);
+    queue_push_head (queue, &variable4);
+    }
 
-	assert(queue_pop_tail(queue) == &variable1);
-	assert(queue_pop_tail(queue) == &variable2);
-	assert(queue_pop_tail(queue) == &variable3);
-	assert(queue_pop_tail(queue) == &variable4);
+  assert (!queue_is_empty (queue));
 
-	/* Check values come back out of the head properly */
+  /* Check values come out of the tail properly */
 
-	assert(queue_pop_head(queue) == &variable4);
-	assert(queue_pop_head(queue) == &variable3);
-	assert(queue_pop_head(queue) == &variable2);
-	assert(queue_pop_head(queue) == &variable1);
+  assert (queue_pop_tail (queue) == &variable1);
+  assert (queue_pop_tail (queue) == &variable2);
+  assert (queue_pop_tail (queue) == &variable3);
+  assert (queue_pop_tail (queue) == &variable4);
 
-	queue_free(queue);
+  /* Check values come back out of the head properly */
 
-	/* Test behavior when running out of memory. */
+  assert (queue_pop_head (queue) == &variable4);
+  assert (queue_pop_head (queue) == &variable3);
+  assert (queue_pop_head (queue) == &variable2);
+  assert (queue_pop_head (queue) == &variable1);
 
-	queue = queue_new();
+  queue_free (queue);
 
-	alloc_test_set_limit(0);
-	assert(!queue_push_head(queue, &variable1));
+  /* Test behavior when running out of memory. */
 
-	queue_free(queue);
-}
+  queue = queue_new();
 
-void test_queue_pop_head(void)
-{
-	Queue *queue;
+  alloc_test_set_limit (0);
+  assert (!queue_push_head (queue, &variable1));
 
-	/* Check popping off an empty queue */
+  queue_free (queue);
+  }
 
-	queue = queue_new();
+void test_queue_pop_head (void) {
+  Queue* queue;
 
-	assert(queue_pop_head(queue) == NULL);
+  /* Check popping off an empty queue */
 
-	queue_free(queue);
+  queue = queue_new();
 
-	/* Pop off all the values from the queue */
+  assert (queue_pop_head (queue) == NULL);
 
-	queue = generate_queue();
+  queue_free (queue);
 
-	while (!queue_is_empty(queue)) {
-		assert(queue_pop_head(queue) == &variable4);
-		assert(queue_pop_head(queue) == &variable3);
-		assert(queue_pop_head(queue) == &variable2);
-		assert(queue_pop_head(queue) == &variable1);
-	}
+  /* Pop off all the values from the queue */
 
-	assert(queue_pop_head(queue) == NULL);
+  queue = generate_queue();
 
-	queue_free(queue);
-}
+  while (!queue_is_empty (queue)) {
+    assert (queue_pop_head (queue) == &variable4);
+    assert (queue_pop_head (queue) == &variable3);
+    assert (queue_pop_head (queue) == &variable2);
+    assert (queue_pop_head (queue) == &variable1);
+    }
 
-void test_queue_peek_head(void)
-{
-	Queue *queue;
+  assert (queue_pop_head (queue) == NULL);
 
-	/* Check peeking into an empty queue */
+  queue_free (queue);
+  }
 
-	queue = queue_new();
+void test_queue_peek_head (void) {
+  Queue* queue;
 
-	assert(queue_peek_head(queue) == NULL);
+  /* Check peeking into an empty queue */
 
-	queue_free(queue);
+  queue = queue_new();
 
-	/* Pop off all the values from the queue, making sure that peek
-	 * has the correct value beforehand */
+  assert (queue_peek_head (queue) == NULL);
 
-	queue = generate_queue();
+  queue_free (queue);
 
-	while (!queue_is_empty(queue)) {
-		assert(queue_peek_head(queue) == &variable4);
-		assert(queue_pop_head(queue) == &variable4);
-		assert(queue_peek_head(queue) == &variable3);
-		assert(queue_pop_head(queue) == &variable3);
-		assert(queue_peek_head(queue) == &variable2);
-		assert(queue_pop_head(queue) == &variable2);
-		assert(queue_peek_head(queue) == &variable1);
-		assert(queue_pop_head(queue) == &variable1);
-	}
+  /* Pop off all the values from the queue, making sure that peek
+   * has the correct value beforehand */
 
-	assert(queue_peek_head(queue) == NULL);
+  queue = generate_queue();
 
-	queue_free(queue);
-}
+  while (!queue_is_empty (queue)) {
+    assert (queue_peek_head (queue) == &variable4);
+    assert (queue_pop_head (queue) == &variable4);
+    assert (queue_peek_head (queue) == &variable3);
+    assert (queue_pop_head (queue) == &variable3);
+    assert (queue_peek_head (queue) == &variable2);
+    assert (queue_pop_head (queue) == &variable2);
+    assert (queue_peek_head (queue) == &variable1);
+    assert (queue_pop_head (queue) == &variable1);
+    }
 
-void test_queue_push_tail(void)
-{
-	Queue *queue;
-	int i;
+  assert (queue_peek_head (queue) == NULL);
 
-	queue = queue_new();
-	
-	/* Add some values */
+  queue_free (queue);
+  }
 
-	for (i=0; i<1000; ++i) {
-		queue_push_tail(queue, &variable1);
-		queue_push_tail(queue, &variable2);
-		queue_push_tail(queue, &variable3);
-		queue_push_tail(queue, &variable4);
-	}
+void test_queue_push_tail (void) {
+  Queue* queue;
+  int i;
 
-	assert(!queue_is_empty(queue));
+  queue = queue_new();
 
-	/* Check values come out of the head properly */
+  /* Add some values */
 
-	assert(queue_pop_head(queue) == &variable1);
-	assert(queue_pop_head(queue) == &variable2);
-	assert(queue_pop_head(queue) == &variable3);
-	assert(queue_pop_head(queue) == &variable4);
+  for (i = 0; i < 1000; ++i) {
+    queue_push_tail (queue, &variable1);
+    queue_push_tail (queue, &variable2);
+    queue_push_tail (queue, &variable3);
+    queue_push_tail (queue, &variable4);
+    }
 
-	/* Check values come back out of the tail properly */
+  assert (!queue_is_empty (queue));
 
-	assert(queue_pop_tail(queue) == &variable4);
-	assert(queue_pop_tail(queue) == &variable3);
-	assert(queue_pop_tail(queue) == &variable2);
-	assert(queue_pop_tail(queue) == &variable1);
+  /* Check values come out of the head properly */
 
-	queue_free(queue);
+  assert (queue_pop_head (queue) == &variable1);
+  assert (queue_pop_head (queue) == &variable2);
+  assert (queue_pop_head (queue) == &variable3);
+  assert (queue_pop_head (queue) == &variable4);
 
-	/* Test behavior when running out of memory. */
+  /* Check values come back out of the tail properly */
 
-	queue = queue_new();
+  assert (queue_pop_tail (queue) == &variable4);
+  assert (queue_pop_tail (queue) == &variable3);
+  assert (queue_pop_tail (queue) == &variable2);
+  assert (queue_pop_tail (queue) == &variable1);
 
-	alloc_test_set_limit(0);
-	assert(!queue_push_tail(queue, &variable1));
+  queue_free (queue);
 
-	queue_free(queue);
-}
+  /* Test behavior when running out of memory. */
 
-void test_queue_pop_tail(void)
-{
-	Queue *queue;
+  queue = queue_new();
 
-	/* Check popping off an empty queue */
+  alloc_test_set_limit (0);
+  assert (!queue_push_tail (queue, &variable1));
 
-	queue = queue_new();
+  queue_free (queue);
+  }
 
-	assert(queue_pop_tail(queue) == NULL);
+void test_queue_pop_tail (void) {
+  Queue* queue;
 
-	queue_free(queue);
+  /* Check popping off an empty queue */
 
-	/* Pop off all the values from the queue */
+  queue = queue_new();
 
-	queue = generate_queue();
+  assert (queue_pop_tail (queue) == NULL);
 
-	while (!queue_is_empty(queue)) {
-		assert(queue_pop_tail(queue) == &variable1);
-		assert(queue_pop_tail(queue) == &variable2);
-		assert(queue_pop_tail(queue) == &variable3);
-		assert(queue_pop_tail(queue) == &variable4);
-	}
+  queue_free (queue);
 
-	assert(queue_pop_tail(queue) == NULL);
+  /* Pop off all the values from the queue */
 
-	queue_free(queue);
-}
+  queue = generate_queue();
 
-void test_queue_peek_tail(void)
-{
-	Queue *queue;
+  while (!queue_is_empty (queue)) {
+    assert (queue_pop_tail (queue) == &variable1);
+    assert (queue_pop_tail (queue) == &variable2);
+    assert (queue_pop_tail (queue) == &variable3);
+    assert (queue_pop_tail (queue) == &variable4);
+    }
 
-	/* Check peeking into an empty queue */
+  assert (queue_pop_tail (queue) == NULL);
 
-	queue = queue_new();
+  queue_free (queue);
+  }
 
-	assert(queue_peek_tail(queue) == NULL);
+void test_queue_peek_tail (void) {
+  Queue* queue;
 
-	queue_free(queue);
+  /* Check peeking into an empty queue */
 
-	/* Pop off all the values from the queue, making sure that peek
-	 * has the correct value beforehand */
+  queue = queue_new();
 
-	queue = generate_queue();
+  assert (queue_peek_tail (queue) == NULL);
 
-	while (!queue_is_empty(queue)) {
-		assert(queue_peek_tail(queue) == &variable1);
-		assert(queue_pop_tail(queue) == &variable1);
-		assert(queue_peek_tail(queue) == &variable2);
-		assert(queue_pop_tail(queue) == &variable2);
-		assert(queue_peek_tail(queue) == &variable3);
-		assert(queue_pop_tail(queue) == &variable3);
-		assert(queue_peek_tail(queue) == &variable4);
-		assert(queue_pop_tail(queue) == &variable4);
-	}
+  queue_free (queue);
 
-	assert(queue_peek_tail(queue) == NULL);
+  /* Pop off all the values from the queue, making sure that peek
+   * has the correct value beforehand */
 
-	queue_free(queue);
-}
+  queue = generate_queue();
 
-void test_queue_is_empty(void)
-{
-	Queue *queue;
+  while (!queue_is_empty (queue)) {
+    assert (queue_peek_tail (queue) == &variable1);
+    assert (queue_pop_tail (queue) == &variable1);
+    assert (queue_peek_tail (queue) == &variable2);
+    assert (queue_pop_tail (queue) == &variable2);
+    assert (queue_peek_tail (queue) == &variable3);
+    assert (queue_pop_tail (queue) == &variable3);
+    assert (queue_peek_tail (queue) == &variable4);
+    assert (queue_pop_tail (queue) == &variable4);
+    }
 
-	queue = queue_new();
+  assert (queue_peek_tail (queue) == NULL);
 
-	assert(queue_is_empty(queue));
+  queue_free (queue);
+  }
 
-	queue_push_head(queue, &variable1);
+void test_queue_is_empty (void) {
+  Queue* queue;
 
-	assert(!queue_is_empty(queue));
+  queue = queue_new();
 
-	queue_pop_head(queue);
+  assert (queue_is_empty (queue));
 
-	assert(queue_is_empty(queue));
+  queue_push_head (queue, &variable1);
 
-	queue_push_tail(queue, &variable1);
+  assert (!queue_is_empty (queue));
 
-	assert(!queue_is_empty(queue));
+  queue_pop_head (queue);
 
-	queue_pop_tail(queue);
+  assert (queue_is_empty (queue));
 
-	assert(queue_is_empty(queue));
+  queue_push_tail (queue, &variable1);
 
-	queue_free(queue);
-}
+  assert (!queue_is_empty (queue));
+
+  queue_pop_tail (queue);
+
+  assert (queue_is_empty (queue));
+
+  queue_free (queue);
+  }
 
 static UnitTestFunction tests[] = {
-	test_queue_new_free,
-	test_queue_push_head,
-	test_queue_pop_head,
-	test_queue_peek_head,
-	test_queue_push_tail,
-	test_queue_pop_tail,
-	test_queue_peek_tail,
-	test_queue_is_empty,
-	NULL
-};
+  test_queue_new_free,
+  test_queue_push_head,
+  test_queue_pop_head,
+  test_queue_peek_head,
+  test_queue_push_tail,
+  test_queue_pop_tail,
+  test_queue_peek_tail,
+  test_queue_is_empty,
+  NULL
+  };
 
-int main(int argc, char *argv[]) 
-{
-	run_tests(tests);
+int main (int argc, char* argv[]) {
+  run_tests (tests);
 
-	return 0;
-}
+  return 0;
+  }
 

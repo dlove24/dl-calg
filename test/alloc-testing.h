@@ -2,19 +2,19 @@
 
 Copyright (c) 2005-2008, Simon Howard
 
-Permission to use, copy, modify, and/or distribute this software 
-for any purpose with or without fee is hereby granted, provided 
-that the above copyright notice and this permission notice appear 
-in all copies. 
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted, provided
+that the above copyright notice and this permission notice appear
+in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE 
-AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
-NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN      
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. 
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
 
@@ -23,10 +23,10 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * @brief Memory allocation testing framework.
  *
- * This file uses the preprocessor to redefine the standard C dynamic memory 
- * allocation functions for testing purposes.  This allows checking that 
- * code under test correctly frees back all memory allocated, as well as 
- * the ability to impose artificial limits on allocation, to test that 
+ * This file uses the preprocessor to redefine the standard C dynamic memory
+ * allocation functions for testing purposes.  This allows checking that
+ * code under test correctly frees back all memory allocated, as well as
+ * the ability to impose artificial limits on allocation, to test that
  * code correctly handles out-of-memory scenarios.
  */
 
@@ -57,7 +57,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *                       possible to allocate the new block.
  */
 
-void *alloc_test_malloc(size_t bytes);
+void* alloc_test_malloc (size_t bytes);
 
 /**
  * Free a block of memory.
@@ -65,7 +65,7 @@ void *alloc_test_malloc(size_t bytes);
  * @param ptr            Pointer to the block to free.
  */
 
-void alloc_test_free(void *ptr);
+void alloc_test_free (void* ptr);
 
 /**
  * Reallocate a previously-allocated block to a new size, preserving
@@ -77,10 +77,10 @@ void alloc_test_free(void *ptr);
  *                       possible to allocate the new block.
  */
 
-void *alloc_test_realloc(void *ptr, size_t bytes);
+void* alloc_test_realloc (void* ptr, size_t bytes);
 
 /**
- * Allocate a block of memory for an array of structures, initialising 
+ * Allocate a block of memory for an array of structures, initialising
  * the contents to zero.
  *
  * @param nmemb          Number of structures to allocate for.
@@ -90,7 +90,7 @@ void *alloc_test_realloc(void *ptr, size_t bytes);
  *                       new block.
  */
 
-void *alloc_test_calloc(size_t nmemb, size_t bytes);
+void* alloc_test_calloc (size_t nmemb, size_t bytes);
 
 /**
  * Allocate a block of memory containing a copy of a string.
@@ -101,21 +101,21 @@ void *alloc_test_calloc(size_t nmemb, size_t bytes);
  *                       to allocate the new block.
  */
 
-char *alloc_test_strdup(const char *string);
+char* alloc_test_strdup (const char* string);
 
 /**
- * Set an artificial limit on the amount of memory that can be 
- * allocated.  
+ * Set an artificial limit on the amount of memory that can be
+ * allocated.
  *
  * @param alloc_count    Number of allocations that are possible after
- *                       this call.  For example, if this has a value 
- *                       of 3, malloc() can be called successfully 
- *                       three times, but all allocation attempts 
+ *                       this call.  For example, if this has a value
+ *                       of 3, malloc() can be called successfully
+ *                       three times, but all allocation attempts
  *                       after this will fail.  If this has a negative
  *                       value, the allocation limit is disabled.
  */
 
-void alloc_test_set_limit(signed int alloc_count);
+void alloc_test_set_limit (signed int alloc_count);
 
 /**
  * Get a count of the number of bytes currently allocated.
@@ -124,7 +124,7 @@ void alloc_test_set_limit(signed int alloc_count);
  *                       the allocation system.
  */
 
-size_t alloc_test_get_allocated(void);
+size_t alloc_test_get_allocated (void);
 
 #endif /* #ifndef ALLOC_TESTING_H */
 
