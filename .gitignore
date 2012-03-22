@@ -34,8 +34,9 @@ tapeworm.c
 .DS_Store
 
 ##
-## Test File
+## Test Files
 ##
+
 ca-*
 
 ##
